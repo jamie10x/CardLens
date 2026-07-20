@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">CardLens</string>
+    <string name="notification_channel_followups">Follow-up reminders</string>
+</resources>
