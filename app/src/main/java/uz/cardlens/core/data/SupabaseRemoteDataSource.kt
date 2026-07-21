@@ -109,6 +109,21 @@ class SupabaseRemoteDataSource(
         }
     }
 
+    suspend fun deleteContact(contactId: String) {
+        val supabase = client ?: return
+        val user = authRepository.currentUser.value ?: return
+        if (!isConfigured) return
+
+        runCatching {
+            supabase.from("contacts").delete {
+                filter {
+                    eq("id", contactId)
+                    eq("user_id", user.id)
+                }
+            }
+        }
+    }
+
     suspend fun completeFollowUp(followUpId: String, contactId: String) {
         val supabase = client ?: return
         val user = authRepository.currentUser.value ?: return

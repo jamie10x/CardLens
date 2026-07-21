@@ -20,6 +20,7 @@ interface CardLensRepository {
     fun observeFollowUps(): Flow<List<FollowUp>>
     fun observeActivities(contactId: String): Flow<List<ContactActivity>>
     suspend fun saveContact(contact: Contact, followUp: FollowUp?): EmptyResult<DataError.Local>
+    suspend fun deleteContact(contactId: String): EmptyResult<DataError.Local>
     suspend fun completeFollowUp(followUpId: String, contactId: String): EmptyResult<DataError.Local>
     suspend fun syncNow(): EmptyResult<DataError.Network>
     suspend fun seedDemoDataIfNeeded()
@@ -70,6 +71,18 @@ class RoomCardLensRepository(
                     ).toEntity(ownerId)
                 )
             }
+            AppResult.Success(Unit)
+        } catch (_: Exception) {
+            AppResult.Error(DataError.Local.UNKNOWN)
+        }
+    }
+
+    override suspend fun deleteContact(contactId: String): EmptyResult<DataError.Local> {
+        return try {
+            val ownerId = activeOwnerId.value
+            dao.deleteActivitiesByContactId(contactId, ownerId)
+            dao.deleteFollowUpsByContactId(contactId, ownerId)
+            dao.deleteContact(contactId, ownerId)
             AppResult.Success(Unit)
         } catch (_: Exception) {
             AppResult.Error(DataError.Local.UNKNOWN)
@@ -163,6 +176,14 @@ class SyncingCardLensRepository(
             remoteDataSource.pushContact(contact, followUp)
         }
         return localResult
+    }
+
+    override suspend fun deleteContact(contactId: String): EmptyResult<DataError.Local> {
+        val result = localRepository.deleteContact(contactId)
+        if (result is AppResult.Success) {
+            remoteDataSource.deleteContact(contactId)
+        }
+        return result
     }
 
     override suspend fun completeFollowUp(followUpId: String, contactId: String): EmptyResult<DataError.Local> {

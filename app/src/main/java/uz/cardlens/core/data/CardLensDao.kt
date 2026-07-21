@@ -42,6 +42,15 @@ interface CardLensDao {
     @Query("UPDATE contacts SET status = :status, updatedAt = :updatedAt WHERE id = :contactId AND ownerId = :ownerId")
     suspend fun updateContactStatus(contactId: String, ownerId: String, status: String, updatedAt: Long)
 
+    @Query("DELETE FROM contacts WHERE id = :id AND ownerId = :ownerId")
+    suspend fun deleteContact(id: String, ownerId: String)
+
+    @Query("DELETE FROM follow_ups WHERE contactId = :contactId AND ownerId = :ownerId")
+    suspend fun deleteFollowUpsByContactId(contactId: String, ownerId: String)
+
+    @Query("DELETE FROM contact_activities WHERE contactId = :contactId AND ownerId = :ownerId")
+    suspend fun deleteActivitiesByContactId(contactId: String, ownerId: String)
+
     @Query("SELECT COUNT(*) FROM contacts WHERE ownerId = :ownerId")
     suspend fun contactCount(ownerId: String): Int
 
