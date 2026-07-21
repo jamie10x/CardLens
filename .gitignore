@@ -6,3 +6,7 @@ build/
 local.properties
 captures/
 *.iml
+# Release signing (keep these OUT of version control)
+app/keystore.properties
+app/*.keystore
+app/*.jks

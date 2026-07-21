@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.enableEdgeToEdge
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -50,8 +51,10 @@ import uz.cardlens.ui.theme.CardLensTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+        splashScreen.setKeepOnScreenCondition { false }
         setContent {
             CardLensTheme {
                 CardLensApp()
@@ -222,10 +225,12 @@ private fun SplashRedirect(
     authState: uz.cardlens.feature.auth.presentation.AuthUiState,
     onDestination: (String) -> Unit,
 ) {
-    LaunchedEffect(authState.isAuthConfigured, authState.email) {
+    LaunchedEffect(authState.sessionRestored, authState.isAuthConfigured, authState.email) {
+        if (!authState.sessionRestored) return@LaunchedEffect
         when {
             !authState.isAuthConfigured -> onDestination("auth")
             authState.email.isNotEmpty() -> onDestination("main")
+            else -> onDestination("auth")
         }
     }
 }

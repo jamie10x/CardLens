@@ -18,6 +18,7 @@ data class AuthUiState(
     val password: String = "",
     val isLoading: Boolean = false,
     val isAuthConfigured: Boolean = false,
+    val sessionRestored: Boolean = false,
     val errorMessage: String? = null,
 )
 
@@ -49,17 +50,19 @@ class AuthViewModel(
             when (val result = authRepository.restoreSession()) {
                 is AppResult.Success -> {
                     val user = result.data
-                    if (user != null) {
-                        _state.update {
-                            it.copy(
-                                isAuthConfigured = authRepository.isConfigured,
-                                email = user.email,
-                            )
-                        }
+                    _state.update {
+                        it.copy(
+                            isAuthConfigured = authRepository.isConfigured,
+                            email = user?.email ?: "",
+                            sessionRestored = true,
+                        )
                     }
                 }
                 is AppResult.Error -> _state.update {
-                    it.copy(isAuthConfigured = authRepository.isConfigured)
+                    it.copy(
+                        isAuthConfigured = authRepository.isConfigured,
+                        sessionRestored = true,
+                    )
                 }
             }
         }
