@@ -1,14 +1,15 @@
 package uz.cardlens.core.domain
 
 import java.util.UUID
+import uz.cardlens.R
 
-enum class ContactStatus(val label: String) {
-    New("New"),
-    FollowUpNeeded("Follow-up Needed"),
-    Contacted("Contacted"),
-    MeetingScheduled("Meeting Scheduled"),
-    Converted("Converted"),
-    Archived("Archived")
+enum class ContactStatus(val label: String, val displayResId: Int) {
+    New("New", R.string.status_new),
+    FollowUpNeeded("Follow-up Needed", R.string.status_follow_up_needed),
+    Contacted("Contacted", R.string.status_contacted),
+    MeetingScheduled("Meeting Scheduled", R.string.status_meeting_scheduled),
+    Converted("Converted", R.string.status_converted),
+    Archived("Archived", R.string.status_archived)
 }
 
 data class UserProfile(

@@ -26,7 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import org.koin.androidx.compose.koinViewModel
+import uz.cardlens.R
 import uz.cardlens.core.domain.ContactStatus
 import uz.cardlens.core.ui.components.ContactCard
 import uz.cardlens.core.ui.components.EmptyText
@@ -46,7 +48,7 @@ fun ContactsRoute(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 20.dp, vertical = 12.dp),
-            placeholder = { Text("Search by name, company, or tags") },
+            placeholder = { Text(stringResource(R.string.contacts_search_placeholder)) },
             leadingIcon = { Icon(Icons.Default.Search, null) },
             shape = RoundedCornerShape(12.dp),
         )
@@ -61,13 +63,13 @@ fun ContactsRoute(
             FilterChip(
                 selected = state.statusFilter == null,
                 onClick = { viewModel.onAction(ContactsAction.FilterByStatus(null)) },
-                label = { Text("All") },
+                label = { Text(stringResource(R.string.contacts_filter_all)) },
             )
             ContactStatus.entries.filter { it != ContactStatus.Archived }.forEach { status ->
                 FilterChip(
                     selected = state.statusFilter == status,
                     onClick = { viewModel.onAction(ContactsAction.FilterByStatus(status)) },
-                    label = { Text(status.label) },
+                    label = { Text(stringResource(status.displayResId)) },
                 )
             }
         }
@@ -78,9 +80,9 @@ fun ContactsRoute(
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             if (state.visibleContacts.isEmpty() && state.searchQuery.isNotEmpty()) {
-                item { EmptyText("No contacts match your search.") }
+                item { EmptyText(stringResource(R.string.contacts_no_results)) }
             } else if (state.visibleContacts.isEmpty()) {
-                item { EmptyText("No contacts yet. Scan your first business card!") }
+                item { EmptyText(stringResource(R.string.contacts_empty)) }
             }
             items(state.visibleContacts, key = { it.id }) { contact ->
                 ContactCard(contact, onClick = { onNavigateToContact(contact.id) })
@@ -91,16 +93,16 @@ fun ContactsRoute(
     if (state.showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { viewModel.onAction(ContactsAction.DismissDelete) },
-            title = { Text("Delete Contact") },
-            text = { Text("Are you sure you want to delete this contact?") },
+            title = { Text(stringResource(R.string.contacts_delete_title)) },
+            text = { Text(stringResource(R.string.contacts_delete_message)) },
             confirmButton = {
                 TextButton(onClick = { viewModel.onAction(ContactsAction.ConfirmDelete) }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.contacts_delete_confirm), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.onAction(ContactsAction.DismissDelete) }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )

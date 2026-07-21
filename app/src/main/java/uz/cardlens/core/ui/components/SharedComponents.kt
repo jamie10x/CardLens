@@ -41,18 +41,21 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import uz.cardlens.R
+import uz.cardlens.core.domain.ContactStatus
 import uz.cardlens.ui.theme.statusColor
 
 @Composable
-fun StatusBadge(label: String) {
-    val color = MaterialTheme.colorScheme.statusColor(label)
+fun StatusBadge(status: ContactStatus) {
+    val color = MaterialTheme.colorScheme.statusColor(status)
     Surface(
         shape = RoundedCornerShape(999.dp),
         color = color.copy(alpha = 0.12f),
         contentColor = color,
     ) {
         Text(
-            label,
+            stringResource(status.displayResId),
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,

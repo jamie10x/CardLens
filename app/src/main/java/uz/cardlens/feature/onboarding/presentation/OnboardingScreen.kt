@@ -24,31 +24,33 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import uz.cardlens.R
 
 private data class OnboardingPage(
-    val title: String,
-    val description: String,
+    val titleResId: Int,
+    val descriptionResId: Int,
     val emoji: String,
 )
 
 private val pages = listOf(
     OnboardingPage(
-        title = "Scan Business Cards",
-        description = "Use your camera to scan business cards instantly. CardLens reads the details automatically.",
+        titleResId = R.string.onboarding_title_1,
+        descriptionResId = R.string.onboarding_desc_1,
         emoji = "\uD83D\uDCF7",
     ),
     OnboardingPage(
-        title = "Organize Contacts",
-        description = "All your scanned contacts in one place. Search, filter, and keep track of everyone you meet.",
+        titleResId = R.string.onboarding_title_2,
+        descriptionResId = R.string.onboarding_desc_2,
         emoji = "\uD83D\uDCC4",
     ),
     OnboardingPage(
-        title = "Never Miss a Follow-up",
-        description = "Set reminders and generate AI-powered follow-up messages to stay connected.",
+        titleResId = R.string.onboarding_title_3,
+        descriptionResId = R.string.onboarding_desc_3,
         emoji = "\u23F0",
     ),
 )
@@ -83,14 +85,14 @@ fun OnboardingRoute(
                 )
                 Spacer(Modifier.height(32.dp))
                 Text(
-                    text = page.title,
+                    text = stringResource(page.titleResId),
                     style = MaterialTheme.typography.headlineMedium,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    text = page.description,
+                    text = stringResource(page.descriptionResId),
                     style = MaterialTheme.typography.bodyLarge,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -129,12 +131,12 @@ fun OnboardingRoute(
                 .fillMaxWidth()
                 .padding(horizontal = 40.dp),
         ) {
-            Text(if (pagerState.currentPage < pages.size - 1) "Next" else "Get Started")
+            Text(if (pagerState.currentPage < pages.size - 1) stringResource(R.string.onboarding_next) else stringResource(R.string.onboarding_get_started))
         }
 
         if (pagerState.currentPage < pages.size - 1) {
             TextButton(onClick = onCompleted) {
-                Text("Skip")
+                Text(stringResource(R.string.onboarding_skip))
             }
         }
 

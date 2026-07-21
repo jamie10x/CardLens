@@ -1,6 +1,8 @@
 package uz.cardlens
 
 import android.Manifest
+import android.content.Context
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -29,6 +31,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
@@ -37,6 +41,7 @@ import androidx.navigation.compose.rememberNavController
 import org.koin.androidx.compose.koinViewModel
 import org.koin.compose.koinInject
 import uz.cardlens.core.datastore.AppPreferences
+import java.util.Locale
 import uz.cardlens.core.navigation.Tab
 import uz.cardlens.core.ui.components.CardLensBottomBar
 import uz.cardlens.feature.auth.presentation.AuthRoute
@@ -50,6 +55,16 @@ import uz.cardlens.feature.settings.presentation.SettingsRoute
 import uz.cardlens.ui.theme.CardLensTheme
 
 class MainActivity : ComponentActivity() {
+    override fun attachBaseContext(newBase: Context?) {
+        val prefs = newBase?.let { AppPreferences(it) }
+        val langCode = prefs?.language ?: "en"
+        val locale = Locale.forLanguageTag(langCode)
+        Locale.setDefault(locale)
+        val config = Configuration(newBase?.resources?.configuration)
+        config.setLocale(locale)
+        super.attachBaseContext(newBase?.createConfigurationContext(config))
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -95,7 +110,7 @@ private fun CardLensApp() {
                 ) {
                     CircularProgressIndicator()
                     Text(
-                        "Loading...",
+                        stringResource(R.string.loading),
                         modifier = Modifier.padding(top = 16.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -174,9 +189,9 @@ private fun MainScaffold(
             CenterAlignedTopAppBar(
                 title = {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text("CardLens", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold)
                         Text(
-                            "Scan cards. Capture contacts. Follow up smarter.",
+                            stringResource(R.string.app_tagline),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -212,9 +227,13 @@ private fun MainScaffold(
                     onNavigateToHome = { activeTab = Tab.Home },
                 )
                 Tab.FollowUps -> FollowUpsRoute()
-                Tab.Settings -> SettingsRoute(
-                    onSignedOut = onSignedOut,
-                )
+                Tab.Settings -> {
+                    val context = LocalContext.current
+                    SettingsRoute(
+                        onSignedOut = onSignedOut,
+                        onToggleLanguage = { (context as? ComponentActivity)?.recreate() },
+                    )
+                }
             }
         }
     }

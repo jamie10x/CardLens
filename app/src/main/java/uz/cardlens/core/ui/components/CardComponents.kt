@@ -24,9 +24,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import uz.cardlens.R
 import uz.cardlens.core.domain.Contact
 import uz.cardlens.core.domain.FollowUp
 
@@ -74,7 +76,7 @@ fun ContactCard(contact: Contact, onClick: () -> Unit) {
                     )
                 }
             }
-            StatusBadge(contact.status.label)
+            StatusBadge(contact.status)
         }
     }
 }
@@ -87,7 +89,7 @@ fun FollowUpCard(followUp: FollowUp, contactName: String?, onComplete: (FollowUp
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(Modifier.weight(1f)) {
-                Text(contactName ?: "Unknown contact", fontWeight = FontWeight.SemiBold)
+                Text(contactName ?: stringResource(R.string.contact_unknown), fontWeight = FontWeight.SemiBold)
                 Text(followUp.title, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(formatDate(followUp.dueAt), style = MaterialTheme.typography.labelMedium)
             }

@@ -58,11 +58,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
+import uz.cardlens.R
 import uz.cardlens.core.domain.ContactStatus
 import uz.cardlens.core.ui.components.EditableField
 import uz.cardlens.core.ui.components.InfoRow
@@ -85,8 +87,9 @@ fun ContactProfileRoute(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is ContactProfileEffect.ShowSnackbar -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
-                    if (effect.message == "Contact deleted") {
+                    val message = context.getString(effect.messageResId, effect.formatArg)
+                    Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+                    if (effect.messageResId == R.string.contact_deleted) {
                         onDeleted()
                     }
                 }
@@ -121,21 +124,21 @@ private fun ContactProfileScreen(
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconButton(onClick = if (state.isEditing) {{ onAction(ContactProfileAction.CancelEdit) }} else onBack) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.contact_back))
                 }
                 Spacer(Modifier.width(8.dp))
                 Text(
-                    if (state.isEditing) "Edit Contact" else "Contact Details",
+                    if (state.isEditing) stringResource(R.string.contact_edit) else stringResource(R.string.contact_details),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(Modifier.weight(1f))
                 if (!state.isEditing) {
                     IconButton(onClick = { onAction(ContactProfileAction.RequestDelete) }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.contact_delete_icon), tint = MaterialTheme.colorScheme.error)
                     }
                     IconButton(onClick = { onAction(ContactProfileAction.StartEdit) }) {
-                        Icon(Icons.Default.Edit, contentDescription = "Edit")
+                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.contact_edit_icon))
                     }
                 }
             }
@@ -143,22 +146,22 @@ private fun ContactProfileScreen(
 
         if (state.isEditing) {
             item {
-                EditableField(label = "Full Name", value = state.editName) { onAction(ContactProfileAction.EditName(it)) }
+                EditableField(label = stringResource(R.string.field_full_name), value = state.editName) { onAction(ContactProfileAction.EditName(it)) }
             }
             item {
-                EditableField(label = "Company", value = state.editCompany) { onAction(ContactProfileAction.EditCompany(it)) }
+                EditableField(label = stringResource(R.string.field_company), value = state.editCompany) { onAction(ContactProfileAction.EditCompany(it)) }
             }
             item {
-                EditableField(label = "Job Title", value = state.editJobTitle) { onAction(ContactProfileAction.EditJobTitle(it)) }
+                EditableField(label = stringResource(R.string.field_job_title), value = state.editJobTitle) { onAction(ContactProfileAction.EditJobTitle(it)) }
             }
             item {
-                EditableField(label = "Email", value = state.editEmail) { onAction(ContactProfileAction.EditEmail(it)) }
+                EditableField(label = stringResource(R.string.field_email), value = state.editEmail) { onAction(ContactProfileAction.EditEmail(it)) }
             }
             item {
-                EditableField(label = "Phone", value = state.editPhone) { onAction(ContactProfileAction.EditPhone(it)) }
+                EditableField(label = stringResource(R.string.field_phone), value = state.editPhone) { onAction(ContactProfileAction.EditPhone(it)) }
             }
             item {
-                EditableField(label = "Location Met", value = state.editLocationMet) { onAction(ContactProfileAction.EditLocationMet(it)) }
+                EditableField(label = stringResource(R.string.field_location_met), value = state.editLocationMet) { onAction(ContactProfileAction.EditLocationMet(it)) }
             }
             item {
                 OutlinedButton(
@@ -167,18 +170,18 @@ private fun ContactProfileScreen(
                 ) {
                     Icon(Icons.Default.Event, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Date Met: ${formatDate(state.editDateMet)}")
+                    Text(stringResource(R.string.contact_date_met, formatDate(state.editDateMet)))
                 }
             }
             item {
-                EditableField(label = "Notes", value = state.editNotes, minLines = 3) { onAction(ContactProfileAction.EditNotes(it)) }
+                EditableField(label = stringResource(R.string.field_notes), value = state.editNotes, minLines = 3) { onAction(ContactProfileAction.EditNotes(it)) }
             }
             item {
                 Button(
                     onClick = { onAction(ContactProfileAction.SaveEdit) },
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Save Changes")
+                    Text(stringResource(R.string.contact_save_changes))
                 }
             }
             return@LazyColumn
@@ -203,19 +206,19 @@ private fun ContactProfileScreen(
                 Column(Modifier.weight(1f)) {
                     Text(contact.fullName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     Text(
-                        "${contact.jobTitle} at ${contact.company}",
+                        stringResource(R.string.contact_job_at_company, contact.jobTitle, contact.company),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 Box {
-                    StatusBadge(contact.status.label)
+                    StatusBadge(contact.status)
                     DropdownMenu(
                         expanded = state.showStatusMenu,
                         onDismissRequest = { onAction(ContactProfileAction.ToggleStatusMenu) },
                     ) {
                         ContactStatus.entries.forEach { status ->
                             DropdownMenuItem(
-                                text = { Text(status.label) },
+                                text = { Text(stringResource(status.displayResId)) },
                                 onClick = { onAction(ContactProfileAction.ChangeStatus(status)) },
                             )
                         }
@@ -228,7 +231,7 @@ private fun ContactProfileScreen(
             item {
                 AsyncImage(
                     model = uri,
-                    contentDescription = "Original card image",
+                    contentDescription = stringResource(R.string.contact_card_image),
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
@@ -259,12 +262,12 @@ private fun ContactProfileScreen(
         item {
             OutlinedCard {
                 Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                    InfoRow(Icons.Default.Person, "Name", contact.fullName)
-                    InfoRow(Icons.Default.Work, "Title", contact.jobTitle)
-                    InfoRow(Icons.Default.Business, "Company", contact.company)
-                    InfoRow(Icons.Default.Email, "Email", contact.email)
-                    InfoRow(Icons.Default.Phone, "Phone", contact.phone)
-                    InfoRow(Icons.Default.Event, "Met", "${formatDate(contact.dateMet)} ${contact.locationMet}")
+                    InfoRow(Icons.Default.Person, stringResource(R.string.contact_info_name), contact.fullName)
+                    InfoRow(Icons.Default.Work, stringResource(R.string.contact_info_title), contact.jobTitle)
+                    InfoRow(Icons.Default.Business, stringResource(R.string.contact_info_company), contact.company)
+                    InfoRow(Icons.Default.Email, stringResource(R.string.contact_info_email), contact.email)
+                    InfoRow(Icons.Default.Phone, stringResource(R.string.contact_info_phone), contact.phone)
+                    InfoRow(Icons.Default.Event, stringResource(R.string.contact_info_met), "${formatDate(contact.dateMet)} ${contact.locationMet}")
                 }
             }
         }
@@ -273,7 +276,7 @@ private fun ContactProfileScreen(
             item {
                 OutlinedCard {
                     Column(Modifier.padding(16.dp)) {
-                        Text("Relationship notes", fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.contact_relationship_notes), fontWeight = FontWeight.SemiBold)
                         Spacer(Modifier.height(6.dp))
                         Text(contact.notes)
                     }
@@ -291,7 +294,7 @@ private fun ContactProfileScreen(
             }
         }
 
-        item { SectionHeader("Follow-up Message") }
+        item { SectionHeader(stringResource(R.string.contact_section_follow_up_message)) }
         item {
             OutlinedButton(
                 onClick = onGenerateMessage,
@@ -300,14 +303,14 @@ private fun ContactProfileScreen(
             ) {
                 Icon(Icons.Default.SmartToy, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text(if (state.isGenerating) "Generating..." else "Generate Message")
+                Text(if (state.isGenerating) stringResource(R.string.contact_generating) else stringResource(R.string.contact_generate_message))
             }
         }
         if (state.generatedMessage.isNotBlank()) {
             item {
                 OutlinedCard {
                     Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text("Suggested message", fontWeight = FontWeight.SemiBold)
+                        Text(stringResource(R.string.contact_suggested_message), fontWeight = FontWeight.SemiBold)
                         Text(state.generatedMessage)
                     }
                 }
@@ -318,16 +321,16 @@ private fun ContactProfileScreen(
     if (state.showDeleteConfirmation) {
         AlertDialog(
             onDismissRequest = { onAction(ContactProfileAction.DismissDelete) },
-            title = { Text("Delete Contact") },
-            text = { Text("Are you sure you want to delete ${contact.fullName}? This cannot be undone.") },
+            title = { Text(stringResource(R.string.contacts_delete_title)) },
+            text = { Text(stringResource(R.string.contact_delete_confirm_message, contact.fullName)) },
             confirmButton = {
                 TextButton(onClick = { onAction(ContactProfileAction.ConfirmDelete) }) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onAction(ContactProfileAction.DismissDelete) }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -343,12 +346,12 @@ private fun ContactProfileScreen(
                         datePickerState.selectedDateMillis?.let { onAction(ContactProfileAction.SelectDate(it)) }
                     },
                 ) {
-                    Text("OK")
+                    Text(stringResource(R.string.ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { onAction(ContactProfileAction.DismissDatePicker) }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         ) {

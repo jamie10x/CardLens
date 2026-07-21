@@ -55,10 +55,10 @@ class FollowUpReminderWorker(
 ) : CoroutineWorker(appContext, params) {
     override suspend fun doWork(): Result {
         NotificationChannels.ensure(applicationContext)
-        val title = inputData.getString(KEY_TITLE) ?: "Follow up with your contact"
+        val title = inputData.getString(KEY_TITLE) ?: applicationContext.getString(R.string.notification_default_title)
         val notification = NotificationCompat.Builder(applicationContext, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_launcher_foreground)
-            .setContentTitle("CardLens follow-up")
+            .setContentTitle(applicationContext.getString(R.string.notification_content_title))
             .setContentText(title)
             .setContentIntent(openAppIntent())
             .setAutoCancel(true)

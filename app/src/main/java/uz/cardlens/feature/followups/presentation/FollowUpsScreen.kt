@@ -10,7 +10,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
 import org.koin.androidx.compose.koinViewModel
+import uz.cardlens.R
 import uz.cardlens.core.ui.components.EmptyText
 import uz.cardlens.core.ui.components.FollowUpCard
 import uz.cardlens.core.ui.components.SectionHeader
@@ -37,9 +39,9 @@ private fun FollowUpsScreen(
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item { SectionHeader("Due Today") }
+        item { SectionHeader(stringResource(R.string.followups_due_today)) }
         if (state.dueToday.isEmpty()) {
-            item { EmptyText("No due follow-ups.") }
+            item { EmptyText(stringResource(R.string.followups_empty_due)) }
         } else {
             items(state.dueToday, key = { it.id }) { followUp ->
                 FollowUpCard(
@@ -49,7 +51,7 @@ private fun FollowUpsScreen(
                 )
             }
         }
-        item { SectionHeader("Upcoming") }
+        item { SectionHeader(stringResource(R.string.followups_upcoming)) }
         items(state.upcoming, key = { it.id }) { followUp ->
             FollowUpCard(
                 followUp = followUp,
@@ -58,7 +60,7 @@ private fun FollowUpsScreen(
             )
         }
         if (state.completed.isNotEmpty()) {
-            item { SectionHeader("Completed") }
+            item { SectionHeader(stringResource(R.string.followups_completed)) }
             items(state.completed, key = { it.id }) { followUp ->
                 FollowUpCard(
                     followUp = followUp,

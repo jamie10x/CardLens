@@ -21,18 +21,20 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
 
-enum class ReminderPreset(val label: String) {
-    LaterToday("Later today"),
-    Tomorrow("Tomorrow"),
-    ThreeDays("In 3 days"),
-    NextWeek("Next week"),
+import uz.cardlens.R
+
+enum class ReminderPreset(val labelResId: Int) {
+    LaterToday(R.string.reminder_later_today),
+    Tomorrow(R.string.reminder_tomorrow),
+    ThreeDays(R.string.reminder_three_days),
+    NextWeek(R.string.reminder_next_week),
 }
 
 data class ScanUiState(
     val isProcessing: Boolean = false,
     val reviewDraft: ContactDraft? = null,
     val rawOcrText: String = "",
-    val snackbar: String? = null,
+    val snackbarResId: Int? = null,
     val selectedReminderPreset: ReminderPreset? = null,
 )
 
@@ -70,20 +72,20 @@ class ScanViewModel(
             is ScanAction.RetakeScan -> _state.update {
                 ScanUiState()
             }
-            is ScanAction.ClearSnackbar -> _state.update { it.copy(snackbar = null) }
+            is ScanAction.ClearSnackbar -> _state.update { it.copy(snackbarResId = null) }
         }
     }
 
     private fun processCard(uri: Uri) {
         viewModelScope.launch {
-            _state.update { it.copy(isProcessing = true, snackbar = "Reading business card...") }
+            _state.update { it.copy(isProcessing = true, snackbarResId = R.string.scan_reading) }
             when (val result = ocrProcessor.readCard(uri)) {
                 is AppResult.Success -> _state.update {
                     it.copy(
                         reviewDraft = result.data.draft,
                         rawOcrText = result.data.rawText,
                         isProcessing = false,
-                        snackbar = null,
+                        snackbarResId = null,
                     )
                 }
                 is AppResult.Error -> _state.update {
@@ -91,7 +93,7 @@ class ScanViewModel(
                         reviewDraft = ContactDraft(cardImageUri = uri.toString()),
                         rawOcrText = "",
                         isProcessing = false,
-                        snackbar = "Could not read the card automatically.",
+                        snackbarResId = R.string.scan_error_ocr,
                     )
                 }
             }
@@ -137,7 +139,7 @@ class ScanViewModel(
                     followUp?.let { reminderScheduler.schedule(it) }
                     _effect.emit(ScanEffect.ContactSaved(contact.id))
                 }
-                is AppResult.Error -> _state.update { it.copy(snackbar = "Could not save contact") }
+                is AppResult.Error -> _state.update { it.copy(snackbarResId = R.string.scan_error_save) }
             }
         }
     }

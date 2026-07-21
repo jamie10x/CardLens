@@ -65,7 +65,10 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.io.File
+import android.widget.Toast
+import androidx.compose.ui.res.stringResource
 import org.koin.androidx.compose.koinViewModel
+import uz.cardlens.R
 import uz.cardlens.core.domain.ContactDraft
 import uz.cardlens.core.ui.components.EditableField
 import uz.cardlens.core.ui.components.EmptyText
@@ -88,6 +91,14 @@ fun ScanRoute(
                     onOcrComplete()
                 }
             }
+        }
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(state.snackbarResId) {
+        state.snackbarResId?.let {
+            Toast.makeText(context, context.getString(it), Toast.LENGTH_SHORT).show()
+            viewModel.onAction(ScanAction.ClearSnackbar)
         }
     }
 
@@ -115,7 +126,7 @@ private fun ScanTab(
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { SectionHeader("Capture Business Card") }
+        item { SectionHeader(stringResource(R.string.scan_capture_title)) }
         item {
             CameraPreview(
                 modifier = Modifier
@@ -132,11 +143,11 @@ private fun ScanTab(
             ) {
                 Icon(Icons.Default.Image, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text("Upload from Gallery")
+                Text(stringResource(R.string.scan_upload_gallery))
             }
         }
         if (isProcessing) {
-            item { EmptyText("Processing card image...") }
+            item { EmptyText(stringResource(R.string.scan_processing)) }
         }
     }
 }
@@ -209,7 +220,7 @@ private fun CameraPreview(
         ) {
             Icon(
                 if (isFlashOn) Icons.Default.Bolt else Icons.Default.FlashOff,
-                contentDescription = if (isFlashOn) "Disable flash" else "Enable flash",
+                contentDescription = if (isFlashOn) stringResource(R.string.scan_flash_on) else stringResource(R.string.scan_flash_off),
                 tint = if (isFlashOn) Color.Yellow else Color.White,
             )
         }
@@ -236,7 +247,7 @@ private fun CameraPreview(
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.5f)),
         ) {
-            Icon(Icons.Default.CameraAlt, contentDescription = "Capture", tint = Color.Black)
+            Icon(Icons.Default.CameraAlt, contentDescription = stringResource(R.string.scan_capture), tint = Color.Black)
         }
     }
 }
@@ -253,28 +264,28 @@ private fun OcrReviewContent(
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        item { SectionHeader("Review Details") }
+        item { SectionHeader(stringResource(R.string.scan_review_title)) }
         item {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                DraftField("Full Name", draft.fullName) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(fullName = it))) }
-                DraftField("Job Title", draft.jobTitle) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(jobTitle = it))) }
-                DraftField("Company", draft.company) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(company = it))) }
-                DraftField("Email", draft.email) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(email = it))) }
-                DraftField("Phone", draft.phone) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(phone = it))) }
-                DraftField("Website", draft.website) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(website = it))) }
-                DraftField("Address", draft.address) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(address = it))) }
-                DraftField("Notes", draft.notes, minLines = 3) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(notes = it))) }
+                DraftField(stringResource(R.string.field_full_name), draft.fullName) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(fullName = it))) }
+                DraftField(stringResource(R.string.field_job_title), draft.jobTitle) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(jobTitle = it))) }
+                DraftField(stringResource(R.string.field_company), draft.company) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(company = it))) }
+                DraftField(stringResource(R.string.field_email), draft.email) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(email = it))) }
+                DraftField(stringResource(R.string.field_phone), draft.phone) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(phone = it))) }
+                DraftField(stringResource(R.string.field_website), draft.website) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(website = it))) }
+                DraftField(stringResource(R.string.field_address), draft.address) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(address = it))) }
+                DraftField(stringResource(R.string.field_notes), draft.notes, minLines = 3) { viewModel.onAction(ScanAction.UpdateDraft(draft.copy(notes = it))) }
             }
         }
 
-        item { SectionHeader("Set Follow-up Reminder") }
+        item { SectionHeader(stringResource(R.string.scan_set_reminder)) }
         item {
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 ReminderPreset.entries.forEach { preset ->
                     val isSelected = state.selectedReminderPreset == preset
                     AssistChip(
                         onClick = { viewModel.onAction(ScanAction.SelectReminderPreset(preset)) },
-                        label = { Text(preset.label) },
+                        label = { Text(stringResource(preset.labelResId)) },
                         leadingIcon = {
                             if (isSelected) {
                                 Icon(Icons.Default.Check, null, modifier = Modifier.size(16.dp))
@@ -291,13 +302,13 @@ private fun OcrReviewContent(
                     onClick = { viewModel.onAction(ScanAction.RetakeScan) },
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Retake")
+                    Text(stringResource(R.string.scan_retake))
                 }
                 Button(
                     onClick = { viewModel.onAction(ScanAction.SaveReviewedContact) },
                     modifier = Modifier.weight(1f),
                 ) {
-                    Text("Save Contact")
+                    Text(stringResource(R.string.scan_save_contact))
                 }
             }
         }

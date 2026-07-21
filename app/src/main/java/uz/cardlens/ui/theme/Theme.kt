@@ -7,6 +7,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import uz.cardlens.core.domain.ContactStatus
 
 private val LightColors = lightColorScheme(
     primary = Color(0xFF0F766E),
@@ -51,14 +52,13 @@ fun CardLensTheme(
     )
 }
 
-fun ColorScheme.statusColor(statusName: String): Color {
-    return when (statusName) {
-        "New" -> secondary
-        "Follow-up Needed" -> Color(0xFFD97706)
-        "Contacted" -> Color(0xFF0891B2)
-        "Meeting Scheduled" -> Color(0xFF7C3AED)
-        "Converted" -> Color(0xFF16A34A)
-        "Archived" -> onSurfaceVariant
-        else -> primary
+fun ColorScheme.statusColor(status: ContactStatus): Color {
+    return when (status) {
+        ContactStatus.New -> secondary
+        ContactStatus.FollowUpNeeded -> Color(0xFFD97706)
+        ContactStatus.Contacted -> Color(0xFF0891B2)
+        ContactStatus.MeetingScheduled -> Color(0xFF7C3AED)
+        ContactStatus.Converted -> Color(0xFF16A34A)
+        ContactStatus.Archived -> onSurfaceVariant
     }
 }

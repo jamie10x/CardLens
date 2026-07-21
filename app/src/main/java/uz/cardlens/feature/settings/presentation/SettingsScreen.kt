@@ -21,9 +21,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
+import uz.cardlens.R
 import uz.cardlens.core.ui.components.SectionHeader
 import uz.cardlens.core.ui.components.SettingsRow
 import uz.cardlens.core.ui.components.formatDate
@@ -31,6 +33,7 @@ import uz.cardlens.core.ui.components.formatDate
 @Composable
 fun SettingsRoute(
     onSignedOut: () -> Unit,
+    onToggleLanguage: () -> Unit = {},
     viewModel: SettingsViewModel = koinViewModel(),
 ) {
     val state by viewModel.state.collectAsState()
@@ -41,15 +44,15 @@ fun SettingsRoute(
             when (effect) {
                 is SettingsEffect.SignedOut -> onSignedOut()
                 is SettingsEffect.ShowSnackbar -> {
-                    Toast.makeText(context, effect.message, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(effect.messageResId), Toast.LENGTH_SHORT).show()
                 }
                 is SettingsEffect.ExportCsv -> {
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         type = "text/csv"
                         putExtra(Intent.EXTRA_TEXT, effect.csvContent)
-                        putExtra(Intent.EXTRA_SUBJECT, "CardLens Contacts Export")
+                        putExtra(Intent.EXTRA_SUBJECT, context.getString(R.string.export_subject))
                     }
-                    context.startActivity(Intent.createChooser(intent, "Export Contacts"))
+                    context.startActivity(Intent.createChooser(intent, context.getString(R.string.settings_export)))
                 }
             }
         }
@@ -62,6 +65,7 @@ fun SettingsRoute(
         onSignOut = { viewModel.onAction(SettingsAction.SignOut) },
         onConfirmSignOut = { viewModel.onAction(SettingsAction.ConfirmSignOut) },
         onDismissSignOut = { viewModel.onAction(SettingsAction.DismissSignOut) },
+        onToggleLanguage = { viewModel.onAction(SettingsAction.ToggleLanguage) },
     )
 }
 
@@ -73,26 +77,27 @@ private fun SettingsScreen(
     onSignOut: () -> Unit,
     onConfirmSignOut: () -> Unit,
     onDismissSignOut: () -> Unit,
+    onToggleLanguage: () -> Unit,
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(20.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
-        item { SectionHeader("Settings") }
+        item { SectionHeader(stringResource(R.string.settings_title)) }
         item {
             SettingsRow(
-                "Profile",
-                if (state.isDemoMode) "Demo user account" else state.userEmail.ifBlank { "Signed-in account" },
+                stringResource(R.string.settings_profile),
+                if (state.isDemoMode) stringResource(R.string.settings_demo_account) else state.userEmail.ifBlank { stringResource(R.string.settings_signed_in_account) },
             )
         }
         item {
             SettingsRow(
-                "Supabase",
+                stringResource(R.string.settings_supabase),
                 when {
-                    state.isDemoMode -> "Demo mode is local only"
-                    state.lastSyncedAt != null -> "Last synced ${formatDate(state.lastSyncedAt)}"
-                    else -> "Ready to sync contacts and follow-ups"
+                    state.isDemoMode -> stringResource(R.string.settings_demo_local)
+                    state.lastSyncedAt != null -> stringResource(R.string.settings_last_synced, formatDate(state.lastSyncedAt))
+                    else -> stringResource(R.string.settings_sync_ready)
                 },
             )
         }
@@ -102,20 +107,31 @@ private fun SettingsScreen(
                 enabled = !state.isDemoMode && !state.isSyncing,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(if (state.isSyncing) "Syncing..." else "Sync with Supabase")
+                Text(if (state.isSyncing) stringResource(R.string.settings_syncing) else stringResource(R.string.settings_sync_now))
             }
         }
-        item { SettingsRow("Notifications", "Local reminders are enabled when permission is granted") }
+        item { SettingsRow(stringResource(R.string.settings_notifications), stringResource(R.string.settings_notifications_desc)) }
         item {
             OutlinedButton(onClick = onExport, modifier = Modifier.fillMaxWidth()) {
-                Text("Export Contacts (CSV)")
+                Text(stringResource(R.string.settings_export))
             }
         }
-        item { SettingsRow("Privacy", "Card images are kept private by default") }
-        item { SettingsRow("App version", "1.0.0 MVP") }
+        item { SettingsRow(stringResource(R.string.settings_privacy), stringResource(R.string.settings_privacy_desc)) }
+        item { SettingsRow(stringResource(R.string.settings_app_version), stringResource(R.string.settings_app_version_value)) }
+        item {
+            SettingsRow(
+                stringResource(R.string.settings_language),
+                if (state.isUzbek) stringResource(R.string.language_uzbek) else stringResource(R.string.language_english),
+            )
+        }
+        item {
+            OutlinedButton(onClick = onToggleLanguage, modifier = Modifier.fillMaxWidth()) {
+                Text(if (state.isUzbek) stringResource(R.string.language_english) else stringResource(R.string.language_uzbek))
+            }
+        }
         item {
             OutlinedButton(onClick = onSignOut, modifier = Modifier.fillMaxWidth()) {
-                Text("Sign Out")
+                Text(stringResource(R.string.settings_sign_out))
             }
         }
     }
@@ -123,16 +139,16 @@ private fun SettingsScreen(
     if (state.showSignOutConfirmation) {
         AlertDialog(
             onDismissRequest = onDismissSignOut,
-            title = { Text("Sign Out") },
-            text = { Text("Are you sure you want to sign out? Your local data will remain, but it won't sync until you sign back in.") },
+            title = { Text(stringResource(R.string.settings_sign_out_title)) },
+            text = { Text(stringResource(R.string.settings_sign_out_message)) },
             confirmButton = {
                 TextButton(onClick = onConfirmSignOut) {
-                    Text("Sign Out", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.settings_sign_out), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = onDismissSignOut) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )

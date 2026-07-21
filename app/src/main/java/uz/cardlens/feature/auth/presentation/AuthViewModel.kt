@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import uz.cardlens.core.common.AppResult
 import uz.cardlens.core.supabase.AuthError
 import uz.cardlens.core.supabase.AuthRepository
+import uz.cardlens.R
 import uz.cardlens.core.supabase.AuthUser
 
 data class AuthUiState(
@@ -19,7 +20,7 @@ data class AuthUiState(
     val isLoading: Boolean = false,
     val isAuthConfigured: Boolean = false,
     val sessionRestored: Boolean = false,
-    val errorMessage: String? = null,
+    val errorResId: Int? = null,
 )
 
 sealed interface AuthAction {
@@ -70,25 +71,25 @@ class AuthViewModel(
 
     fun onAction(action: AuthAction) {
         when (action) {
-            is AuthAction.EmailChanged -> _state.update { it.copy(email = action.value, errorMessage = null) }
-            is AuthAction.PasswordChanged -> _state.update { it.copy(password = action.value, errorMessage = null) }
+            is AuthAction.EmailChanged -> _state.update { it.copy(email = action.value, errorResId = null) }
+            is AuthAction.PasswordChanged -> _state.update { it.copy(password = action.value, errorResId = null) }
             is AuthAction.SignIn -> signIn(action.email, action.password)
             is AuthAction.SignUp -> signUp(action.email, action.password)
             is AuthAction.ContinueDemo -> continueDemo()
-            is AuthAction.ClearError -> _state.update { it.copy(errorMessage = null) }
+            is AuthAction.ClearError -> _state.update { it.copy(errorResId = null) }
         }
     }
 
     private fun signIn(email: String, password: String) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            _state.update { it.copy(isLoading = true, errorResId = null) }
             when (val result = authRepository.signIn(email, password)) {
                 is AppResult.Success -> {
                     _state.update { it.copy(isLoading = false) }
                     _effects.send(AuthEffect.SignedIn)
                 }
                 is AppResult.Error -> _state.update {
-                    it.copy(isLoading = false, errorMessage = result.error.toMessage())
+                    it.copy(isLoading = false, errorResId = result.error.toMessageResId())
                 }
             }
         }
@@ -96,14 +97,14 @@ class AuthViewModel(
 
     private fun signUp(email: String, password: String) {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, errorMessage = null) }
+            _state.update { it.copy(isLoading = true, errorResId = null) }
             when (val result = authRepository.signUp(email, password)) {
                 is AppResult.Success -> {
                     _state.update { it.copy(isLoading = false) }
                     _effects.send(AuthEffect.SignedIn)
                 }
                 is AppResult.Error -> _state.update {
-                    it.copy(isLoading = false, errorMessage = result.error.toMessage())
+                    it.copy(isLoading = false, errorResId = result.error.toMessageResId())
                 }
             }
         }
@@ -116,10 +117,10 @@ class AuthViewModel(
         }
     }
 
-    private fun AuthError.toMessage(): String = when (this) {
-        AuthError.NOT_CONFIGURED -> "Add SUPABASE_URL and SUPABASE_ANON_KEY to local.properties first."
-        AuthError.INVALID_INPUT -> "Enter a valid email and a password with at least 6 characters."
-        AuthError.EMAIL_CONFIRMATION_REQUIRED -> "Check your email to confirm your account."
-        AuthError.UNKNOWN -> "Authentication failed. Check your credentials and Supabase settings."
+    private fun AuthError.toMessageResId(): Int = when (this) {
+        AuthError.NOT_CONFIGURED -> R.string.auth_error_not_configured
+        AuthError.INVALID_INPUT -> R.string.auth_error_invalid_input
+        AuthError.EMAIL_CONFIRMATION_REQUIRED -> R.string.auth_error_email_confirmation
+        AuthError.UNKNOWN -> R.string.auth_error_unknown
     }
 }

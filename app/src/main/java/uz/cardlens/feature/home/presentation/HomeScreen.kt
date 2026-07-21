@@ -14,9 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
+import uz.cardlens.R
 import uz.cardlens.core.domain.Contact
 import uz.cardlens.core.ui.components.ContactCard
 import uz.cardlens.core.ui.components.EmptyText
@@ -54,22 +56,22 @@ private fun HomeScreen(
     ) {
         item {
             Text(
-                "Hello, ${state.userName.ifBlank { "Networker" }}!",
+                stringResource(R.string.home_greeting, state.userName.ifBlank { stringResource(R.string.home_default_name) }),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )
-            Text("Your network snapshot for today", color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(stringResource(R.string.home_network_snapshot), color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
         item {
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                MetricCard("Contacts", state.contacts.size.toString(), Modifier.weight(1f))
-                MetricCard("Due Today", state.dueToday.size.toString(), Modifier.weight(1f))
+                MetricCard(stringResource(R.string.home_contacts_label), state.contacts.size.toString(), Modifier.weight(1f))
+                MetricCard(stringResource(R.string.home_due_today), state.dueToday.size.toString(), Modifier.weight(1f))
             }
         }
 
         if (state.dueToday.isNotEmpty()) {
-            item { SectionHeader("Action Needed") }
+            item { SectionHeader(stringResource(R.string.home_action_needed)) }
             items(state.dueToday.take(3), key = { it.id }) { followUp ->
                 FollowUpCard(
                     followUp = followUp,
@@ -79,17 +81,17 @@ private fun HomeScreen(
             }
             item {
                 TextButton(onClick = onNavigateToFollowUps) {
-                    Text("View all tasks")
+                    Text(stringResource(R.string.home_view_all_tasks))
                 }
             }
         }
 
-        item { SectionHeader("Recent Scans") }
+        item { SectionHeader(stringResource(R.string.home_recent_scans)) }
         if (state.isLoading) {
             item { ShimmerCard() }
             item { ShimmerCard() }
         } else if (state.contacts.isEmpty()) {
-            item { EmptyText("No contacts yet. Start by scanning a business card!") }
+            item { EmptyText(stringResource(R.string.home_no_contacts)) }
         } else {
             items(state.contacts.take(5), key = { it.id }) { contact ->
                 ContactCard(contact, onClick = { onContactClick(contact.id) })

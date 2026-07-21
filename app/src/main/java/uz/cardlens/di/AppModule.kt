@@ -16,6 +16,6 @@ val viewModelModule = module {
     viewModel { ContactsViewModel(get()) }
     viewModel { ScanViewModel(get(), get(), get()) }
     viewModel { FollowUpsViewModel(get()) }
-    viewModel { SettingsViewModel(get(), get()) }
+    viewModel { SettingsViewModel(get(), get(), get()) }
     viewModel { params -> ContactProfileViewModel(params.get(), get(), get()) }
 }

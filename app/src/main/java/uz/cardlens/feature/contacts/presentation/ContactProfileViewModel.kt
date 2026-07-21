@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uz.cardlens.R
 import uz.cardlens.core.data.CardLensRepository
 import uz.cardlens.core.domain.Contact
 import uz.cardlens.core.domain.ContactStatus
@@ -61,7 +62,7 @@ sealed interface ContactProfileAction {
 }
 
 sealed interface ContactProfileEffect {
-    data class ShowSnackbar(val message: String) : ContactProfileEffect
+    data class ShowSnackbar(val messageResId: Int, val formatArg: String? = null) : ContactProfileEffect
 }
 
 class ContactProfileViewModel(
@@ -143,14 +144,14 @@ class ContactProfileViewModel(
             )
             repository.saveContact(updated, null)
             mutableState.update { it.copy(isEditing = false) }
-            _effects.send(ContactProfileEffect.ShowSnackbar("Contact updated"))
+            _effects.send(ContactProfileEffect.ShowSnackbar(R.string.contact_updated))
         }
     }
 
     private fun confirmDelete() {
         viewModelScope.launch {
             repository.deleteContact(contactId)
-            _effects.send(ContactProfileEffect.ShowSnackbar("Contact deleted"))
+            _effects.send(ContactProfileEffect.ShowSnackbar(R.string.contact_deleted))
         }
     }
 
@@ -159,7 +160,7 @@ class ContactProfileViewModel(
         viewModelScope.launch {
             repository.saveContact(c.copy(status = status, updatedAt = System.currentTimeMillis()), null)
             mutableState.update { it.copy(showStatusMenu = false) }
-            _effects.send(ContactProfileEffect.ShowSnackbar("Status changed to ${status.label}"))
+            _effects.send(ContactProfileEffect.ShowSnackbar(R.string.contact_status_changed, status.label))
         }
     }
 

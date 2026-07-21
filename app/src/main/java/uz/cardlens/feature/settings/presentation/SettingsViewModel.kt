@@ -10,8 +10,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import uz.cardlens.R
 import uz.cardlens.core.common.AppResult
 import uz.cardlens.core.data.CardLensRepository
+import uz.cardlens.core.datastore.AppPreferences
 import uz.cardlens.core.supabase.AuthRepository
 
 data class SettingsUiState(
@@ -20,7 +22,8 @@ data class SettingsUiState(
     val isSyncing: Boolean = false,
     val lastSyncedAt: Long? = null,
     val isAuthConfigured: Boolean = false,
-    val snackbar: String? = null,
+    val isUzbek: Boolean = false,
+    val snackbarResId: Int? = null,
     val showSignOutConfirmation: Boolean = false,
 )
 
@@ -31,17 +34,19 @@ sealed interface SettingsAction {
     data object DismissSignOut : SettingsAction
     data object ExportContacts : SettingsAction
     data object ClearSnackbar : SettingsAction
+    data object ToggleLanguage : SettingsAction
 }
 
 sealed interface SettingsEffect {
     data object SignedOut : SettingsEffect
-    data class ShowSnackbar(val message: String) : SettingsEffect
+    data class ShowSnackbar(val messageResId: Int) : SettingsEffect
     data class ExportCsv(val csvContent: String) : SettingsEffect
 }
 
 class SettingsViewModel(
     private val authRepository: AuthRepository,
     private val repository: CardLensRepository,
+    private val appPreferences: AppPreferences,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(SettingsUiState())
@@ -57,6 +62,7 @@ class SettingsViewModel(
                 isDemoMode = user?.isDemo == true,
                 userEmail = user?.email ?: "",
                 isAuthConfigured = authRepository.isConfigured,
+                isUzbek = appPreferences.language == "uz",
             )
         }
     }
@@ -68,7 +74,12 @@ class SettingsViewModel(
             is SettingsAction.ConfirmSignOut -> signOut()
             is SettingsAction.DismissSignOut -> _state.update { it.copy(showSignOutConfirmation = false) }
             is SettingsAction.ExportContacts -> exportContacts()
-            is SettingsAction.ClearSnackbar -> _state.update { it.copy(snackbar = null) }
+            is SettingsAction.ClearSnackbar -> _state.update { it.copy(snackbarResId = null) }
+            is SettingsAction.ToggleLanguage -> {
+                val newLang = if (appPreferences.language == "en") "uz" else "en"
+                appPreferences.language = newLang
+                _state.update { it.copy(isUzbek = newLang == "uz") }
+            }
         }
     }
 
@@ -96,10 +107,10 @@ class SettingsViewModel(
             _state.update { it.copy(isSyncing = true) }
             when (repository.syncNow()) {
                 is AppResult.Success -> _state.update {
-                    it.copy(isSyncing = false, lastSyncedAt = System.currentTimeMillis(), snackbar = "Sync complete")
+                    it.copy(isSyncing = false, lastSyncedAt = System.currentTimeMillis(), snackbarResId = R.string.settings_sync_complete)
                 }
                 is AppResult.Error -> _state.update {
-                    it.copy(isSyncing = false, snackbar = if (it.isDemoMode) "Demo mode is local only" else "Could not sync")
+                    it.copy(isSyncing = false, snackbarResId = if (it.isDemoMode) R.string.settings_demo_local else R.string.settings_sync_error)
                 }
             }
         }

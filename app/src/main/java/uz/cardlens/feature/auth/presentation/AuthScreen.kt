@@ -29,10 +29,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import org.koin.androidx.compose.koinViewModel
+import uz.cardlens.R
 
 @Composable
 fun AuthRoute(
@@ -93,31 +95,31 @@ private fun AuthScreen(
                     tint = MaterialTheme.colorScheme.onPrimary,
                 )
             }
-            Text("CardLens", style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.auth_title), style = MaterialTheme.typography.headlineLarge, fontWeight = FontWeight.Bold)
             Text(
-                "Never lose a business card again.",
+                stringResource(R.string.auth_subtitle),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             if (!state.isAuthConfigured) {
                 Text(
-                    "Supabase is not configured yet. Demo mode is available.",
+                    stringResource(R.string.auth_not_configured),
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     style = MaterialTheme.typography.bodySmall,
                 )
             }
-            state.errorMessage?.let { error ->
-                Text(error, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
+            state.errorResId?.let { resId ->
+                Text(stringResource(resId), color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
             }
             OutlinedTextField(
                 value = state.email,
                 onValueChange = onEmailChanged,
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.auth_email_label)) },
                 modifier = Modifier.fillMaxWidth(),
             )
             OutlinedTextField(
                 value = state.password,
                 onValueChange = onPasswordChanged,
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.auth_password_label)) },
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -126,13 +128,13 @@ private fun AuthScreen(
                 enabled = !state.isLoading,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text(if (state.isLoading) "Signing in..." else "Sign In")
+                Text(if (state.isLoading) stringResource(R.string.auth_signing_in) else stringResource(R.string.auth_sign_in))
             }
             TextButton(
                 onClick = { onSignUp(state.email to state.password) },
                 enabled = !state.isLoading,
             ) {
-                Text("Create account")
+                Text(stringResource(R.string.auth_create_account))
             }
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -143,7 +145,7 @@ private fun AuthScreen(
                         .background(MaterialTheme.colorScheme.outlineVariant),
                 )
                 Text(
-                    " OR ",
+                    stringResource(R.string.auth_or),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -158,7 +160,7 @@ private fun AuthScreen(
                 onClick = onDemo,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Continue in Demo Mode")
+                Text(stringResource(R.string.auth_demo_mode))
             }
         }
     }
