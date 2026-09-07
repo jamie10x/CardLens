@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Event
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
@@ -69,7 +68,6 @@ import uz.cardlens.core.domain.ContactStatus
 import uz.cardlens.core.ui.components.EditableField
 import uz.cardlens.core.ui.components.InfoRow
 import uz.cardlens.core.ui.components.QuickActions
-import uz.cardlens.core.ui.components.SectionHeader
 import uz.cardlens.core.ui.components.StatusBadge
 import uz.cardlens.core.ui.components.formatDate
 
@@ -82,12 +80,20 @@ fun ContactProfileRoute(
 ) {
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val contactUpdatedText = stringResource(R.string.contact_updated)
+    val contactDeletedText = stringResource(R.string.contact_deleted)
+    val contactStatusChangedText = stringResource(R.string.contact_status_changed)
 
     LaunchedEffect(Unit) {
         viewModel.effects.collect { effect ->
             when (effect) {
                 is ContactProfileEffect.ShowSnackbar -> {
-                    val message = context.getString(effect.messageResId, effect.formatArg)
+                    val message = when (effect.messageResId) {
+                        R.string.contact_updated -> contactUpdatedText
+                        R.string.contact_deleted -> contactDeletedText
+                        R.string.contact_status_changed -> String.format(contactStatusChangedText, effect.formatArg)
+                        else -> ""
+                    }
                     Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
                     if (effect.messageResId == R.string.contact_deleted) {
                         onDeleted()
@@ -101,7 +107,6 @@ fun ContactProfileRoute(
         state = state,
         context = context,
         onBack = onBack,
-        onGenerateMessage = { state.contact?.let { viewModel.onAction(ContactProfileAction.GenerateMessage(it)) } },
         onAction = viewModel::onAction,
     )
 }
@@ -111,7 +116,6 @@ private fun ContactProfileScreen(
     state: ContactProfileUiState,
     context: android.content.Context,
     onBack: () -> Unit,
-    onGenerateMessage: () -> Unit,
     onAction: (ContactProfileAction) -> Unit,
 ) {
     val contact = state.contact ?: return
@@ -255,7 +259,6 @@ private fun ContactProfileScreen(
                     val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                     clip.setPrimaryClip(ClipData.newPlainText("Contact", contact.fullName))
                 },
-                onGenerate = onGenerateMessage,
             )
         }
 
@@ -289,29 +292,6 @@ private fun ContactProfileScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     contact.tags.forEach {
                         AssistChip(onClick = {}, label = { Text(it.name) })
-                    }
-                }
-            }
-        }
-
-        item { SectionHeader(stringResource(R.string.contact_section_follow_up_message)) }
-        item {
-            OutlinedButton(
-                onClick = onGenerateMessage,
-                enabled = !state.isGenerating,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Icon(Icons.Default.SmartToy, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(if (state.isGenerating) stringResource(R.string.contact_generating) else stringResource(R.string.contact_generate_message))
-            }
-        }
-        if (state.generatedMessage.isNotBlank()) {
-            item {
-                OutlinedCard {
-                    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(stringResource(R.string.contact_suggested_message), fontWeight = FontWeight.SemiBold)
-                        Text(state.generatedMessage)
                     }
                 }
             }

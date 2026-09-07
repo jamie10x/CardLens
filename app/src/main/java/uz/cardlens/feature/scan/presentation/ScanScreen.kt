@@ -95,9 +95,10 @@ fun ScanRoute(
     }
 
     val context = LocalContext.current
+    val snackbarMessage = state.snackbarResId?.let { stringResource(it) }
     LaunchedEffect(state.snackbarResId) {
-        state.snackbarResId?.let {
-            Toast.makeText(context, context.getString(it), Toast.LENGTH_SHORT).show()
+        snackbarMessage?.let {
+            Toast.makeText(context, it, Toast.LENGTH_SHORT).show()
             viewModel.onAction(ScanAction.ClearSnackbar)
         }
     }

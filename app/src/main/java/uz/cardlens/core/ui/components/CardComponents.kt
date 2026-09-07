@@ -95,7 +95,7 @@ fun FollowUpCard(followUp: FollowUp, contactName: String?, onComplete: (FollowUp
             }
             if (!followUp.completed) {
                 IconButton(onClick = { onComplete(followUp) }) {
-                    Icon(Icons.Default.Check, contentDescription = "Mark done")
+                    Icon(Icons.Default.Check, contentDescription = stringResource(R.string.followups_mark_done))
                 }
             }
         }

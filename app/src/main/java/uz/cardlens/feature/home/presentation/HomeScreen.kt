@@ -56,7 +56,7 @@ private fun HomeScreen(
     ) {
         item {
             Text(
-                stringResource(R.string.home_greeting, state.userName.ifBlank { stringResource(R.string.home_default_name) }),
+                stringResource(R.string.home_greeting),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
             )

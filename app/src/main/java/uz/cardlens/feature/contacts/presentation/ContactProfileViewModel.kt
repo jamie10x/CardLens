@@ -16,12 +16,9 @@ import uz.cardlens.R
 import uz.cardlens.core.data.CardLensRepository
 import uz.cardlens.core.domain.Contact
 import uz.cardlens.core.domain.ContactStatus
-import uz.cardlens.core.supabase.EdgeAiClient
 
 data class ContactProfileUiState(
     val contact: Contact? = null,
-    val generatedMessage: String = "",
-    val isGenerating: Boolean = false,
     val isEditing: Boolean = false,
     val editName: String = "",
     val editCompany: String = "",
@@ -37,7 +34,6 @@ data class ContactProfileUiState(
 )
 
 sealed interface ContactProfileAction {
-    data class GenerateMessage(val contact: Contact) : ContactProfileAction
     data object StartEdit : ContactProfileAction
     data object CancelEdit : ContactProfileAction
     data object SaveEdit : ContactProfileAction
@@ -56,9 +52,6 @@ sealed interface ContactProfileAction {
     data object DismissDelete : ContactProfileAction
     data object ToggleStatusMenu : ContactProfileAction
     data class ChangeStatus(val status: ContactStatus) : ContactProfileAction
-    data object Call : ContactProfileAction
-    data object Email : ContactProfileAction
-    data object Copy : ContactProfileAction
 }
 
 sealed interface ContactProfileEffect {
@@ -68,7 +61,6 @@ sealed interface ContactProfileEffect {
 class ContactProfileViewModel(
     private val contactId: String,
     private val repository: CardLensRepository,
-    private val edgeAiClient: EdgeAiClient,
 ) : ViewModel() {
 
     private val mutableState = MutableStateFlow(ContactProfileUiState())
@@ -85,7 +77,6 @@ class ContactProfileViewModel(
 
     fun onAction(action: ContactProfileAction) {
         when (action) {
-            is ContactProfileAction.GenerateMessage -> generateMessage(action.contact)
             is ContactProfileAction.StartEdit -> startEdit()
             is ContactProfileAction.CancelEdit -> mutableState.update { it.copy(isEditing = false) }
             is ContactProfileAction.SaveEdit -> saveEdit()
@@ -104,9 +95,6 @@ class ContactProfileViewModel(
             is ContactProfileAction.DismissDelete -> mutableState.update { it.copy(showDeleteConfirmation = false) }
             is ContactProfileAction.ToggleStatusMenu -> mutableState.update { it.copy(showStatusMenu = !it.showStatusMenu) }
             is ContactProfileAction.ChangeStatus -> changeStatus(action.status)
-            is ContactProfileAction.Call -> Unit
-            is ContactProfileAction.Email -> Unit
-            is ContactProfileAction.Copy -> Unit
         }
     }
 
@@ -161,14 +149,6 @@ class ContactProfileViewModel(
             repository.saveContact(c.copy(status = status, updatedAt = System.currentTimeMillis()), null)
             mutableState.update { it.copy(showStatusMenu = false) }
             _effects.send(ContactProfileEffect.ShowSnackbar(R.string.contact_status_changed, status.label))
-        }
-    }
-
-    private fun generateMessage(contact: Contact) {
-        viewModelScope.launch {
-            mutableState.update { it.copy(isGenerating = true, generatedMessage = "") }
-            val message = edgeAiClient.generateFollowUp(contact)
-            mutableState.update { it.copy(isGenerating = false, generatedMessage = message) }
         }
     }
 }

@@ -9,36 +9,19 @@
     <string name="nav_followups">Follow-ups</string>
     <string name="nav_settings">Settings</string>
 
-    <!-- Auth -->
-    <string name="auth_title">CardLens</string>
-    <string name="auth_subtitle">Never lose a business card again.</string>
-    <string name="auth_not_configured">Supabase is not configured yet. Demo mode is available.</string>
-    <string name="auth_or"> OR </string>
-    <string name="auth_email_label">Email</string>
-    <string name="auth_password_label">Password</string>
-    <string name="auth_sign_in">Sign In</string>
-    <string name="auth_signing_in">Signing in…</string>
-    <string name="auth_create_account">Create account</string>
-    <string name="auth_demo_mode">Continue in Demo Mode</string>
-    <string name="auth_error_not_configured">Add SUPABASE_URL and SUPABASE_ANON_KEY to local.properties first.</string>
-    <string name="auth_error_invalid_input">Enter a valid email and a password with at least 6 characters.</string>
-    <string name="auth_error_email_confirmation">Check your email to confirm your account.</string>
-    <string name="auth_error_unknown">Authentication failed. Check your credentials and Supabase settings.</string>
-
     <!-- Onboarding -->
     <string name="onboarding_title_1">Scan Business Cards</string>
     <string name="onboarding_desc_1">Use your camera to scan business cards instantly. CardLens reads the details automatically.</string>
     <string name="onboarding_title_2">Organize Contacts</string>
     <string name="onboarding_desc_2">All your scanned contacts in one place. Search, filter, and keep track of everyone you meet.</string>
     <string name="onboarding_title_3">Never Miss a Follow-up</string>
-    <string name="onboarding_desc_3">Set reminders and generate AI-powered follow-up messages to stay connected.</string>
+    <string name="onboarding_desc_3">Set reminders so you always know who to follow up with and when.</string>
     <string name="onboarding_next">Next</string>
     <string name="onboarding_get_started">Get Started</string>
     <string name="onboarding_skip">Skip</string>
 
     <!-- Home -->
-    <string name="home_greeting">Hello, %s!</string>
-    <string name="home_default_name">Networker</string>
+    <string name="home_greeting">Hello!</string>
     <string name="home_network_snapshot">Your network snapshot for today</string>
     <string name="home_contacts_label">Contacts</string>
     <string name="home_due_today">Due Today</string>
@@ -46,6 +29,7 @@
     <string name="home_recent_scans">Recent Scans</string>
     <string name="home_view_all_tasks">View all tasks</string>
     <string name="home_no_contacts">No contacts yet. Start by scanning a business card!</string>
+    <string name="home_scan_cta">Scan a card</string>
 
     <!-- Contacts -->
     <string name="contacts_search_placeholder">Search by name, company, or tags</string>
@@ -67,9 +51,6 @@
     <string name="contact_updated">Contact updated</string>
     <string name="contact_deleted">Contact deleted</string>
     <string name="contact_status_changed">Status changed to %s</string>
-    <string name="contact_generate_message">Generate Message</string>
-    <string name="contact_generating">Generating…</string>
-    <string name="contact_suggested_message">Suggested message</string>
     <string name="contact_date_met">Date Met: %s</string>
     <string name="contact_relationship_notes">Relationship notes</string>
     <string name="contact_info_name">Name</string>
@@ -83,8 +64,7 @@
     <string name="contact_untitled">Untitled contact</string>
     <string name="contact_follow_up_title">Follow up with %s</string>
     <string name="contact_new_contact">new contact</string>
-    <string name="contact_job_at_company">%s at %s</string>
-    <string name="contact_section_follow_up_message">Follow-up Message</string>
+    <string name="contact_job_at_company">%1$s at %2$s</string>
 
     <!-- Scan -->
     <string name="scan_capture_title">Capture Business Card</string>
@@ -108,31 +88,23 @@
     <string name="followups_completed">Completed</string>
     <string name="followups_empty_due">No due follow-ups.</string>
     <string name="followups_empty">No follow-ups yet.</string>
+    <string name="followups_mark_done">Mark done</string>
 
     <!-- Settings -->
     <string name="settings_title">Settings</string>
     <string name="settings_profile">Profile</string>
-    <string name="settings_demo_account">Demo user account</string>
-    <string name="settings_signed_in_account">Signed-in account</string>
-    <string name="settings_supabase">Supabase</string>
-    <string name="settings_demo_local">Demo mode is local only</string>
-    <string name="settings_last_synced">Last synced %s</string>
-    <string name="settings_sync_ready">Ready to sync contacts and follow-ups</string>
-    <string name="settings_sync_now">Sync with Supabase</string>
-    <string name="settings_syncing">Syncing…</string>
-    <string name="settings_sync_complete">Sync complete</string>
-    <string name="settings_sync_error">Could not sync</string>
+    <string name="settings_local_account">Local contact library</string>
     <string name="settings_notifications">Notifications</string>
     <string name="settings_notifications_desc">Local reminders are enabled when permission is granted</string>
     <string name="settings_export">Export Contacts (CSV)</string>
     <string name="settings_privacy">Privacy</string>
-    <string name="settings_privacy_desc">Card images are kept private by default</string>
+    <string name="settings_privacy_desc">Everything stays on your device. No account or internet required.</string>
+    <string name="settings_storage">Storage</string>
+    <string name="settings_storage_desc">Your contacts and card images are stored only on this device</string>
     <string name="settings_app_version">App version</string>
-    <string name="settings_app_version_value">1.0.0 MVP</string>
-    <string name="settings_sign_out">Sign Out</string>
-    <string name="settings_sign_out_title">Sign Out</string>
-    <string name="settings_sign_out_message">Are you sure you want to sign out? Your local data will remain, but it won\'t sync until you sign back in.</string>
+    <string name="settings_app_version_value">1.0.0</string>
     <string name="settings_language">Language</string>
+    <string name="settings_offline_note">CardLens works fully offline. Your data never leaves your device.</string>
     <string name="language_english">English</string>
     <string name="language_uzbek">O\'zbek</string>
 
@@ -157,7 +129,6 @@
     <string name="action_call">Call</string>
     <string name="action_email">Email</string>
     <string name="action_copy">Copy</string>
-    <string name="action_ai">AI</string>
 
     <!-- Contact status labels -->
     <string name="status_new">New</string>

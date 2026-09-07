@@ -12,13 +12,6 @@ enum class ContactStatus(val label: String, val displayResId: Int) {
     Archived("Archived", R.string.status_archived)
 }
 
-data class UserProfile(
-    val id: String,
-    val fullName: String,
-    val email: String,
-    val createdAt: Long
-)
-
 data class Tag(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
@@ -110,20 +103,5 @@ data class ContactActivity(
     val contactId: String,
     val type: String,
     val description: String,
-    val createdAt: Long = System.currentTimeMillis()
-)
-
-data class CardImage(
-    val id: String = UUID.randomUUID().toString(),
-    val contactId: String?,
-    val localUri: String,
-    val remoteUrl: String? = null,
-    val createdAt: Long = System.currentTimeMillis()
-)
-
-data class GeneratedMessage(
-    val id: String = UUID.randomUUID().toString(),
-    val contactId: String,
-    val message: String,
     val createdAt: Long = System.currentTimeMillis()
 )

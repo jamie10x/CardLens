@@ -1,21 +1,35 @@
 package uz.cardlens.core.datastore
 
 import android.content.Context
-import android.content.SharedPreferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
-class AppPreferences(context: Context) {
-    private val prefs: SharedPreferences = context.getSharedPreferences("cardlens_prefs", Context.MODE_PRIVATE)
+private val Context.cardLensDataStore by preferencesDataStore(name = "cardlens_prefs")
 
-    var isOnboardingCompleted: Boolean
-        get() = prefs.getBoolean(ONBOARDING_KEY, false)
-        set(value) = prefs.edit().putBoolean(ONBOARDING_KEY, value).apply()
+class AppPreferences(private val context: Context) {
 
-    var language: String
-        get() = prefs.getString(LANGUAGE_KEY, "en") ?: "en"
-        set(value) = prefs.edit().putString(LANGUAGE_KEY, value).apply()
+    private val onboardingCompletedKey = booleanPreferencesKey("onboarding_completed")
+    private val languageKey = stringPreferencesKey("language")
 
-    companion object {
-        private const val ONBOARDING_KEY = "onboarding_completed"
-        private const val LANGUAGE_KEY = "language"
+    val isOnboardingCompleted: Flow<Boolean> = context.cardLensDataStore.data
+        .map { it[onboardingCompletedKey] ?: false }
+
+    val language: Flow<String> = context.cardLensDataStore.data
+        .map { it[languageKey] ?: "en" }
+
+    suspend fun setOnboardingCompleted(completed: Boolean) {
+        context.cardLensDataStore.edit { it[onboardingCompletedKey] = completed }
     }
+
+    suspend fun setLanguage(language: String) {
+        context.cardLensDataStore.edit { it[languageKey] = language }
+    }
+
+    fun languageSync(): String = runBlocking { language.first() }
 }

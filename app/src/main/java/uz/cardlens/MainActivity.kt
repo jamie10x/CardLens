@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -24,10 +23,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,13 +37,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import org.koin.androidx.compose.koinViewModel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import uz.cardlens.core.datastore.AppPreferences
 import java.util.Locale
 import uz.cardlens.core.navigation.Tab
 import uz.cardlens.core.ui.components.CardLensBottomBar
-import uz.cardlens.feature.auth.presentation.AuthRoute
 import uz.cardlens.feature.contacts.presentation.ContactProfileRoute
 import uz.cardlens.feature.contacts.presentation.ContactsRoute
 import uz.cardlens.feature.followups.presentation.FollowUpsRoute
@@ -57,7 +56,7 @@ import uz.cardlens.ui.theme.CardLensTheme
 class MainActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context?) {
         val prefs = newBase?.let { AppPreferences(it) }
-        val langCode = prefs?.language ?: "en"
+        val langCode = prefs?.languageSync() ?: "en"
         val locale = Locale.forLanguageTag(langCode)
         Locale.setDefault(locale)
         val config = Configuration(newBase?.resources?.configuration)
@@ -78,21 +77,27 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+sealed class AppRoute(val route: String) {
+    data object Onboarding : AppRoute("onboarding")
+    data object Main : AppRoute("main")
+    data class Contact(val contactId: String) : AppRoute("contact/$contactId") {
+        companion object {
+            const val PATTERN = "contact/{contactId}"
+        }
+    }
+}
+
 @Composable
 private fun CardLensApp() {
     val navController = rememberNavController()
     val appPrefs: AppPreferences = koinInject()
-    val authViewModel: uz.cardlens.feature.auth.presentation.AuthViewModel = koinViewModel()
-    val authState by authViewModel.state.collectAsState()
+    val scope = rememberCoroutineScope()
 
     var startRoute by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        startRoute = if (!appPrefs.isOnboardingCompleted) {
-            "onboarding"
-        } else {
-            "splash"
-        }
+        val completed = appPrefs.isOnboardingCompleted.first()
+        startRoute = if (completed) AppRoute.Main.route else AppRoute.Onboarding.route
     }
 
     val currentRoute = startRoute ?: "splash"
@@ -108,7 +113,7 @@ private fun CardLensApp() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center,
                 ) {
-                    CircularProgressIndicator()
+                    androidx.compose.material3.CircularProgressIndicator()
                     Text(
                         stringResource(R.string.loading),
                         modifier = Modifier.padding(top = 16.dp),
@@ -116,45 +121,25 @@ private fun CardLensApp() {
                     )
                 }
             }
-            SplashRedirect(
-                authState = authState,
-                onDestination = { dest ->
-                    navController.navigate(dest) {
-                        popUpTo("splash") { inclusive = true }
-                    }
-                },
-            )
         }
-        composable("onboarding") {
+        composable(AppRoute.Onboarding.route) {
             OnboardingRoute(
                 onCompleted = {
-                    appPrefs.isOnboardingCompleted = true
-                    navController.navigate("splash") {
-                        popUpTo("onboarding") { inclusive = true }
+                    scope.launch {
+                        appPrefs.setOnboardingCompleted(true)
+                        navController.navigate(AppRoute.Main.route) {
+                            popUpTo("splash") { inclusive = true }
+                        }
                     }
                 },
             )
         }
-        composable("auth") {
-            AuthRoute(
-                onSignedIn = {
-                    navController.navigate("main") {
-                        popUpTo("auth") { inclusive = true }
-                    }
-                },
-            )
-        }
-        composable("main") {
+        composable(AppRoute.Main.route) {
             MainScaffold(
-                onNavigateToContact = { id -> navController.navigate("contact/$id") },
-                onSignedOut = {
-                    navController.navigate("auth") {
-                        popUpTo("main") { inclusive = true }
-                    }
-                },
+                onNavigateToContact = { id -> navController.navigate(AppRoute.Contact(id).route) },
             )
         }
-        composable("contact/{contactId}") { backStackEntry ->
+        composable(AppRoute.Contact.PATTERN) { backStackEntry ->
             val contactId = backStackEntry.arguments?.getString("contactId") ?: return@composable
             ContactProfileRoute(
                 contactId = contactId,
@@ -169,7 +154,6 @@ private fun CardLensApp() {
 @Composable
 private fun MainScaffold(
     onNavigateToContact: (String) -> Unit,
-    onSignedOut: () -> Unit,
 ) {
     var activeTab by remember { mutableStateOf(Tab.Home) }
 
@@ -230,26 +214,10 @@ private fun MainScaffold(
                 Tab.Settings -> {
                     val context = LocalContext.current
                     SettingsRoute(
-                        onSignedOut = onSignedOut,
                         onToggleLanguage = { (context as? ComponentActivity)?.recreate() },
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-private fun SplashRedirect(
-    authState: uz.cardlens.feature.auth.presentation.AuthUiState,
-    onDestination: (String) -> Unit,
-) {
-    LaunchedEffect(authState.sessionRestored, authState.isAuthConfigured, authState.email) {
-        if (!authState.sessionRestored) return@LaunchedEffect
-        when {
-            !authState.isAuthConfigured -> onDestination("auth")
-            authState.email.isNotEmpty() -> onDestination("main")
-            else -> onDestination("auth")
         }
     }
 }

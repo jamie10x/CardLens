@@ -9,36 +9,19 @@
     <string name="nav_followups">Eslatmalar</string>
     <string name="nav_settings">Sozlamalar</string>
 
-    <!-- Auth -->
-    <string name="auth_title">CardLens</string>
-    <string name="auth_subtitle">Boshqa vizitkalarni yo\'qotmang.</string>
-    <string name="auth_not_configured">Supabase sozlanmagan. Demo rejimi mavjud.</string>
-    <string name="auth_or"> YOKI </string>
-    <string name="auth_email_label">Elektron pochta</string>
-    <string name="auth_password_label">Parol</string>
-    <string name="auth_sign_in">Kirish</string>
-    <string name="auth_signing_in">Kirish…</string>
-    <string name="auth_create_account">Ro\'yxatdan o\'tish</string>
-    <string name="auth_demo_mode">Demo rejimida davom etish</string>
-    <string name="auth_error_not_configured">Avval SUPABASE_URL va SUPABASE_ANON_KEY ni local.properties fayliga qo\'shing.</string>
-    <string name="auth_error_invalid_input">To\'g\'ri elektron pochta va kamida 6 belgidan iborat parol kiriting.</string>
-    <string name="auth_error_email_confirmation">Hisobingizni tasdiqlash uchun pochtangizni tekshiring.</string>
-    <string name="auth_error_unknown">Autentifikatsiya amalga oshmadi. Ma\'lumotlaringizni tekshiring.</string>
-
     <!-- Onboarding -->
     <string name="onboarding_title_1">Vizitkalarni skanerlang</string>
     <string name="onboarding_desc_1">Kamerangiz yordamida vizitkalarni bir zumda skanerlang. CardLens ma\'lumotlarni avtomatik o\'qiydi.</string>
     <string name="onboarding_title_2">Kontaktlarni tartibga soling</string>
     <string name="onboarding_desc_2">Barcha skanerlangan kontaktlar bir joyda. Qidiring, filtrlang va uchrashganlaringizni kuzatib boring.</string>
     <string name="onboarding_title_3">Eslatmalarni o\'tkazib yubormang</string>
-    <string name="onboarding_desc_3">Eslatmalar o\'rnating va sun\'iy intellekt yordamida bog\'lanish xabarlarini yarating.</string>
+    <string name="onboarding_desc_3">Eslatmalar o\'rnating va kim bilan, qachon bog\'lanishni bilib boring.</string>
     <string name="onboarding_next">Keyingi</string>
     <string name="onboarding_get_started">Boshlash</string>
     <string name="onboarding_skip">O\'tkazib yuborish</string>
 
     <!-- Home -->
-    <string name="home_greeting">Salom, %s!</string>
-    <string name="home_default_name">Tanishuvchi</string>
+    <string name="home_greeting">Salom!</string>
     <string name="home_network_snapshot">Bugungi tarmog\'ingiz</string>
     <string name="home_contacts_label">Kontaktlar</string>
     <string name="home_due_today">Bugun muddati</string>
@@ -46,6 +29,7 @@
     <string name="home_recent_scans">Oxirgi skanerlar</string>
     <string name="home_view_all_tasks">Barcha vazifalarni ko\'rish</string>
     <string name="home_no_contacts">Hali kontaktlar yo\'q. Vizitkani skanerlashdan boshlang!</string>
+    <string name="home_scan_cta">Vizitka skanerlash</string>
 
     <!-- Contacts -->
     <string name="contacts_search_placeholder">Ism, kompaniya yoki teglar bo\'yicha qidirish</string>
@@ -67,9 +51,6 @@
     <string name="contact_updated">Kontakt yangilandi</string>
     <string name="contact_deleted">Kontakt o\'chirildi</string>
     <string name="contact_status_changed">Holat %s ga o\'zgartirildi</string>
-    <string name="contact_generate_message">Xabar yaratish</string>
-    <string name="contact_generating">Yaratilmoqda…</string>
-    <string name="contact_suggested_message">Tavsiya qilingan xabar</string>
     <string name="contact_date_met">Uchrashilgan sana: %s</string>
     <string name="contact_relationship_notes">Munosabat eslatmalari</string>
     <string name="contact_info_name">Ism</string>
@@ -83,8 +64,7 @@
     <string name="contact_untitled">Nomsiz kontakt</string>
     <string name="contact_follow_up_title">%s bilan bog\'lanish</string>
     <string name="contact_new_contact">yangi kontakt</string>
-    <string name="contact_job_at_company">%s, %s</string>
-    <string name="contact_section_follow_up_message">Bog\'lanish xabari</string>
+    <string name="contact_job_at_company">%1$s, %2$s</string>
 
     <!-- Scan -->
     <string name="scan_capture_title">Vizitkani suratga olish</string>
@@ -108,31 +88,23 @@
     <string name="followups_completed">Bajarilgan</string>
     <string name="followups_empty_due">Muddati kelgan eslatmalar yo\'q.</string>
     <string name="followups_empty">Hali eslatmalar yo\'q.</string>
+    <string name="followups_mark_done">Bajarilgan deb belgilash</string>
 
     <!-- Settings -->
     <string name="settings_title">Sozlamalar</string>
     <string name="settings_profile">Profil</string>
-    <string name="settings_demo_account">Demo foydalanuvchi</string>
-    <string name="settings_signed_in_account">Kirilgan hisob</string>
-    <string name="settings_supabase">Supabase</string>
-    <string name="settings_demo_local">Demo rejimi faqat mahalliy</string>
-    <string name="settings_last_synced">Oxirgi sinxronlash: %s</string>
-    <string name="settings_sync_ready">Kontaktlar va eslatmalarni sinxronlashga tayyor</string>
-    <string name="settings_sync_now">Supabase bilan sinxronlash</string>
-    <string name="settings_syncing">Sinxronlanmoqda…</string>
-    <string name="settings_sync_complete">Sinxronlash tugadi</string>
-    <string name="settings_sync_error">Sinxronlab bo\'lmadi</string>
+    <string name="settings_local_account">Mahalliy kontakt kutubxonasi</string>
     <string name="settings_notifications">Bildirishnomalar</string>
     <string name="settings_notifications_desc">Mahalliy eslatmalar ruxsat berilganda ishlaydi</string>
     <string name="settings_export">Kontaktlarni eksport qilish (CSV)</string>
     <string name="settings_privacy">Maxfiylik</string>
-    <string name="settings_privacy_desc">Vizitka rasmlari sukut bo\'yicha maxfiy</string>
+    <string name="settings_privacy_desc">Hamma narsa qurilmangizda qoladi. Hisob yoki internet talab qilinmaydi.</string>
+    <string name="settings_storage">Xotira</string>
+    <string name="settings_storage_desc">Kontaktlar va vizitka rasmlari faqat shu qurilmada saqlanadi</string>
     <string name="settings_app_version">Ilova versiyasi</string>
-    <string name="settings_app_version_value">1.0.0 MVP</string>
-    <string name="settings_sign_out">Chiqish</string>
-    <string name="settings_sign_out_title">Chiqish</string>
-    <string name="settings_sign_out_message">Chiqishni xohlaysizmi? Mahalliy ma\'lumotlaringiz saqlanadi, ammo qayta kirmaguningizcha sinxronlanmaydi.</string>
+    <string name="settings_app_version_value">1.0.0</string>
     <string name="settings_language">Til</string>
+    <string name="settings_offline_note">CardLens to\'liq oflayn ishlaydi. Ma\'lumotlaringiz hech qachon qurilmangizni tark etmaydi.</string>
     <string name="language_english">Ingliz tili</string>
     <string name="language_uzbek">O\'zbek tili</string>
 
@@ -157,7 +129,6 @@
     <string name="action_call">Qo\'ng\'iroq</string>
     <string name="action_email">Pochta</string>
     <string name="action_copy">Nusxa</string>
-    <string name="action_ai">AI</string>
 
     <!-- Contact status labels -->
     <string name="status_new">Yangi</string>

@@ -23,7 +23,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -129,16 +128,14 @@ fun QuickActions(
     onCall: () -> Unit = {},
     onEmail: () -> Unit = {},
     onCopy: () -> Unit = {},
-    onGenerate: () -> Unit = {},
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        AssistChip(onClick = onCall, label = { Text("Call") }, leadingIcon = { Icon(Icons.Default.Phone, null) })
-        AssistChip(onClick = onEmail, label = { Text("Email") }, leadingIcon = { Icon(Icons.Default.Email, null) })
-        AssistChip(onClick = onCopy, label = { Text("Copy") }, leadingIcon = { Icon(Icons.Default.ContentCopy, null) })
-        AssistChip(onClick = onGenerate, label = { Text("AI") }, leadingIcon = { Icon(Icons.Default.SmartToy, null) })
+        AssistChip(onClick = onCall, label = { Text(stringResource(R.string.action_call)) }, leadingIcon = { Icon(Icons.Default.Phone, null) })
+        AssistChip(onClick = onEmail, label = { Text(stringResource(R.string.action_email)) }, leadingIcon = { Icon(Icons.Default.Email, null) })
+        AssistChip(onClick = onCopy, label = { Text(stringResource(R.string.action_copy)) }, leadingIcon = { Icon(Icons.Default.ContentCopy, null) })
     }
 }
 
