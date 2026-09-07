@@ -1,48 +1,102 @@
 package uz.cardlens.core.ui.components
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Badge
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Badge
+import androidx.compose.material.icons.outlined.CameraAlt
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import uz.cardlens.R
 import uz.cardlens.core.navigation.Tab
 
 data class BottomNavItem(
     val tab: Tab,
     val labelResId: Int,
-    val icon: ImageVector,
+    val filledIcon: ImageVector,
+    val outlineIcon: ImageVector,
 )
 
 val bottomNavItems = listOf(
-    BottomNavItem(Tab.Home, R.string.nav_home, Icons.Default.Home),
-    BottomNavItem(Tab.Contacts, R.string.nav_contacts, Icons.Default.Badge),
-    BottomNavItem(Tab.Scan, R.string.nav_scan, Icons.Default.CameraAlt),
-    BottomNavItem(Tab.FollowUps, R.string.nav_followups, Icons.Default.Check),
-    BottomNavItem(Tab.Settings, R.string.nav_settings, Icons.Default.Settings),
+    BottomNavItem(Tab.Home, R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home),
+    BottomNavItem(Tab.Contacts, R.string.nav_contacts, Icons.Filled.Badge, Icons.Outlined.Badge),
+    BottomNavItem(Tab.Scan, R.string.nav_scan, Icons.Filled.CameraAlt, Icons.Outlined.CameraAlt),
+    BottomNavItem(Tab.FollowUps, R.string.nav_followups, Icons.Filled.Check, Icons.Outlined.Check),
+    BottomNavItem(Tab.Settings, R.string.nav_settings, Icons.Filled.Settings, Icons.Outlined.Settings),
 )
 
 @Composable
 fun CardLensBottomBar(
     activeTab: Tab,
     onTabClick: (Tab) -> Unit,
+    notificationsBadge: Boolean = false,
 ) {
-    NavigationBar {
+    NavigationBar(
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 0.dp,
+        modifier = Modifier.height(72.dp),
+    ) {
         bottomNavItems.forEach { item ->
             val label = stringResource(item.labelResId)
+            val selected = activeTab == item.tab
             NavigationBarItem(
-                selected = activeTab == item.tab,
+                selected = selected,
                 onClick = { onTabClick(item.tab) },
-                icon = { Icon(item.icon, contentDescription = label) },
-                label = { Text(label) },
+                icon = {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            if (selected) item.filledIcon else item.outlineIcon,
+                            contentDescription = label,
+                            modifier = Modifier.size(26.dp),
+                        )
+                        if (item.tab == Tab.FollowUps && notificationsBadge) {
+                            Box(
+                                Modifier
+                                    .size(8.dp)
+                                    .align(Alignment.TopEnd)
+                                    .background(MaterialTheme.colorScheme.error, CircleShape),
+                            )
+                        }
+                    }
+                },
+                label = {
+                    Text(
+                        label,
+                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
+                        style = MaterialTheme.typography.labelMedium,
+                    )
+                },
+                colors = NavigationBarItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                ),
             )
         }
     }

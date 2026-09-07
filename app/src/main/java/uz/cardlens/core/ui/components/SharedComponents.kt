@@ -1,7 +1,5 @@
 package uz.cardlens.core.ui.components
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
@@ -14,22 +12,25 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.outlined.ContentCopy
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,88 +39,255 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
-import uz.cardlens.R
-import uz.cardlens.core.domain.ContactStatus
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import uz.cardlens.ui.theme.statusColor
+import uz.cardlens.ui.theme.statusSoftColor
 
 @Composable
-fun StatusBadge(status: ContactStatus) {
+fun StatusBadge(status: uz.cardlens.core.domain.ContactStatus) {
     val color = MaterialTheme.colorScheme.statusColor(status)
+    val soft = MaterialTheme.colorScheme.statusSoftColor(status)
     Surface(
         shape = RoundedCornerShape(999.dp),
-        color = color.copy(alpha = 0.12f),
+        color = soft,
         contentColor = color,
     ) {
-        Text(
-            stringResource(status.displayResId),
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
-            style = MaterialTheme.typography.labelSmall,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+        ) {
+            Box(
+                Modifier
+                    .size(6.dp)
+                    .clip(CircleShape)
+                    .background(color),
+            )
+            Spacer(Modifier.width(6.dp))
+            Text(
+                androidx.compose.ui.res.stringResource(status.displayResId),
+                style = MaterialTheme.typography.labelSmall,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+    }
+}
+
+@Composable
+fun PremiumMetricCard(
+    label: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    gradient: List<Color> = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary),
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+    ) {
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .background(
+                    Brush.linearGradient(gradient),
+                    RoundedCornerShape(20.dp),
+                ),
+        ) {
+            Column(Modifier.padding(18.dp)) {
+                if (icon != null) {
+                    Icon(
+                        icon,
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.85f),
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Spacer(Modifier.height(10.dp))
+                }
+                Text(
+                    value,
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                )
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.White.copy(alpha = 0.85f),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SectionHeader(text: String, modifier: Modifier = Modifier) {
+    Row(
+        modifier = modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Box(
+            Modifier
+                .size(width = 4.dp, height = 18.dp)
+                .clip(RoundedCornerShape(2.dp))
+                .background(MaterialTheme.colorScheme.primary),
+        )
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
         )
     }
 }
 
 @Composable
-fun MetricCard(label: String, value: String, modifier: Modifier = Modifier) {
-    OutlinedCard(modifier = modifier) {
-        Column(Modifier.padding(16.dp)) {
-            Text(value, style = MaterialTheme.typography.headlineMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-            Text(label, color = MaterialTheme.colorScheme.onSurfaceVariant)
+fun EmptyState(
+    title: String,
+    modifier: Modifier = Modifier,
+    description: String? = null,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
+    actionLabel: String? = null,
+    onAction: (() -> Unit)? = null,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Box(
+            Modifier
+                .size(72.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f))
+        ) {
+            if (icon != null) {
+                Icon(
+                    icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier
+                        .size(32.dp)
+                        .align(Alignment.Center),
+                )
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.SemiBold,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+        )
+        if (description != null) {
+            Spacer(Modifier.height(6.dp))
+            Text(
+                description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+        }
+        if (actionLabel != null && onAction != null) {
+            Spacer(Modifier.height(16.dp))
+            androidx.compose.material3.Button(onClick = onAction) {
+                Text(actionLabel)
+            }
         }
     }
 }
 
-@Composable
-fun SectionHeader(text: String) {
-    Text(text, style = MaterialTheme.typography.titleMedium, fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
-}
-
+// Kept for API compatibility where callers pass a single text
 @Composable
 fun EmptyText(text: String) {
-    Text(
-        text,
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 52.dp)
-            .padding(12.dp),
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+    EmptyState(title = text)
 }
 
 @Composable
-fun SettingsRow(title: String, subtitle: String) {
-    OutlinedCard(modifier = Modifier.fillMaxWidth()) {
-        Column(Modifier.padding(16.dp)) {
-            Text(title, fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold)
-            Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant)
+fun SettingsRow(title: String, subtitle: String, modifier: Modifier = Modifier) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text(
+                    title,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                )
+                Spacer(Modifier.height(2.dp))
+                Text(
+                    subtitle,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Icon(
+                Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.outline,
+            )
         }
     }
 }
 
 @Composable
-fun InfoRow(icon: ImageVector, label: String, value: String) {
+fun InfoRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    value: String,
+) {
     if (value.isBlank()) return
     Row(verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-        Spacer(Modifier.width(10.dp))
+        Box(
+            Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+        }
+        Spacer(Modifier.width(12.dp))
         Column {
             Text(label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            Text(value)
+            Spacer(Modifier.height(1.dp))
+            Text(value, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
         }
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditableField(label: String, value: String, minLines: Int = 1, onChange: (String) -> Unit) {
+fun EditableField(
+    label: String,
+    value: String,
+    minLines: Int = 1,
+    onChange: (String) -> Unit,
+) {
     OutlinedTextField(
         value = value,
         onValueChange = onChange,
         label = { Text(label) },
         modifier = Modifier.fillMaxWidth(),
         minLines = minLines,
+        singleLine = minLines == 1,
+        shape = RoundedCornerShape(14.dp),
+        colors = OutlinedTextFieldDefaults.colors(
+            focusedBorderColor = MaterialTheme.colorScheme.primary,
+            unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant,
+            focusedContainerColor = MaterialTheme.colorScheme.surface,
+            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+        ),
     )
 }
 
@@ -130,12 +298,62 @@ fun QuickActions(
     onCopy: () -> Unit = {},
 ) {
     Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        AssistChip(onClick = onCall, label = { Text(stringResource(R.string.action_call)) }, leadingIcon = { Icon(Icons.Default.Phone, null) })
-        AssistChip(onClick = onEmail, label = { Text(stringResource(R.string.action_email)) }, leadingIcon = { Icon(Icons.Default.Email, null) })
-        AssistChip(onClick = onCopy, label = { Text(stringResource(R.string.action_copy)) }, leadingIcon = { Icon(Icons.Default.ContentCopy, null) })
+        QuickActionButton(
+            icon = Icons.Outlined.Phone,
+            label = stringResource(uz.cardlens.R.string.action_call),
+            onClick = onCall,
+            modifier = Modifier.weight(1f),
+        )
+        QuickActionButton(
+            icon = Icons.Outlined.Email,
+            label = stringResource(uz.cardlens.R.string.action_email),
+            onClick = onEmail,
+            modifier = Modifier.weight(1f),
+        )
+        QuickActionButton(
+            icon = Icons.Outlined.ContentCopy,
+            label = stringResource(uz.cardlens.R.string.action_copy),
+            onClick = onCopy,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}
+
+@Composable
+private fun QuickActionButton(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        onClick = onClick,
+        modifier = modifier,
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+        ),
+    ) {
+        Column(
+            modifier = Modifier.padding(vertical = 14.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Icon(
+                icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(22.dp),
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }
 
@@ -146,25 +364,34 @@ fun ShimmerCard(modifier: Modifier = Modifier) {
         initialValue = 0f,
         targetValue = 1000f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart,
+            animation = tween(durationMillis = 1200),
         ),
         label = "shimmer_translate",
     )
     val brush = Brush.linearGradient(
         colors = listOf(
-            Color.LightGray.copy(alpha = 0.3f),
-            Color.LightGray.copy(alpha = 0.6f),
-            Color.LightGray.copy(alpha = 0.3f),
+            MaterialTheme.colorScheme.surfaceVariant,
+            MaterialTheme.colorScheme.outlineVariant,
+            MaterialTheme.colorScheme.surfaceVariant,
         ),
-        start = Offset(translateAnim, 0f),
-        end = Offset(translateAnim + 500f, 0f),
+        start = Offset(translateAnim - 300f, 0f),
+        end = Offset(translateAnim, 300f),
     )
-    OutlinedCard(modifier = modifier) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Box(Modifier.fillMaxWidth().height(20.dp).clip(RoundedCornerShape(4.dp)).background(brush))
-            Box(Modifier.fillMaxWidth(0.6f).height(16.dp).clip(RoundedCornerShape(4.dp)).background(brush))
-            Box(Modifier.fillMaxWidth(0.4f).height(14.dp).clip(RoundedCornerShape(4.dp)).background(brush))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(Modifier.size(44.dp).clip(CircleShape).background(brush))
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Box(Modifier.fillMaxWidth(0.5f).height(16.dp).clip(RoundedCornerShape(4.dp)).background(brush))
+                    Spacer(Modifier.height(6.dp))
+                    Box(Modifier.fillMaxWidth(0.35f).height(12.dp).clip(RoundedCornerShape(4.dp)).background(brush))
+                }
+            }
         }
     }
 }

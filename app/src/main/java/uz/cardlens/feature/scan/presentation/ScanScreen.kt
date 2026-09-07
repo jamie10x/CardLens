@@ -15,6 +15,7 @@ import androidx.camera.core.SurfaceOrientedMeteringPointFactory
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +35,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bolt
-import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.FlashOff
 import androidx.compose.material.icons.filled.Image
@@ -56,6 +56,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
@@ -226,6 +227,25 @@ private fun CameraPreview(
             )
         }
 
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.Center)
+                .padding(28.dp),
+            contentAlignment = Alignment.Center,
+        ) {
+            Box(
+                Modifier
+                    .fillMaxWidth(0.82f)
+                    .height(140.dp)
+                    .border(
+                        width = 2.dp,
+                        color = Color.White.copy(alpha = 0.7f),
+                        shape = RoundedCornerShape(16.dp),
+                    ),
+            )
+        }
+
         IconButton(
             onClick = {
                 val file = File(context.cacheDir, "card_${System.currentTimeMillis()}.jpg")
@@ -244,11 +264,23 @@ private fun CameraPreview(
             },
             modifier = Modifier
                 .padding(bottom = 20.dp)
-                .size(64.dp)
+                .size(68.dp)
                 .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.5f)),
+                .background(
+                    Brush.linearGradient(
+                        listOf(
+                            MaterialTheme.colorScheme.primary,
+                            MaterialTheme.colorScheme.secondary,
+                        ),
+                    ),
+                ),
         ) {
-            Icon(Icons.Default.CameraAlt, contentDescription = stringResource(R.string.scan_capture), tint = Color.Black)
+            Box(
+                Modifier
+                    .size(54.dp)
+                    .clip(CircleShape)
+                    .border(2.dp, Color.White.copy(alpha = 0.9f), CircleShape),
+            )
         }
     }
 }

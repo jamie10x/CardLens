@@ -44,7 +44,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
@@ -55,6 +54,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -127,10 +127,15 @@ private fun ContactProfileScreen(
     ) {
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                IconButton(onClick = if (state.isEditing) {{ onAction(ContactProfileAction.CancelEdit) }} else onBack) {
+                IconButton(
+                    onClick = if (state.isEditing) {{ onAction(ContactProfileAction.CancelEdit) }} else onBack,
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                ) {
                     Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.contact_back))
                 }
-                Spacer(Modifier.width(8.dp))
+                Spacer(Modifier.width(12.dp))
                 Text(
                     if (state.isEditing) stringResource(R.string.contact_edit) else stringResource(R.string.contact_details),
                     style = MaterialTheme.typography.titleLarge,
@@ -142,7 +147,7 @@ private fun ContactProfileScreen(
                         Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.contact_delete_icon), tint = MaterialTheme.colorScheme.error)
                     }
                     IconButton(onClick = { onAction(ContactProfileAction.StartEdit) }) {
-                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.contact_edit_icon))
+                        Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.contact_edit_icon), tint = MaterialTheme.colorScheme.primary)
                     }
                 }
             }
@@ -171,6 +176,7 @@ private fun ContactProfileScreen(
                 OutlinedButton(
                     onClick = { onAction(ContactProfileAction.ShowDatePicker) },
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
                 ) {
                     Icon(Icons.Default.Event, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
@@ -183,9 +189,12 @@ private fun ContactProfileScreen(
             item {
                 Button(
                     onClick = { onAction(ContactProfileAction.SaveEdit) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
                 ) {
-                    Text(stringResource(R.string.contact_save_changes))
+                    Text(stringResource(R.string.contact_save_changes), fontWeight = FontWeight.SemiBold)
                 }
             }
             return@LazyColumn
@@ -195,15 +204,22 @@ private fun ContactProfileScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
                     modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
+                        .size(72.dp)
+                        .clip(RoundedCornerShape(22.dp))
+                        .background(
+                            Brush.linearGradient(
+                                listOf(
+                                    MaterialTheme.colorScheme.primary,
+                                    MaterialTheme.colorScheme.secondary,
+                                ),
+                            ),
+                        ),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         contact.fullName.take(1).ifBlank { "?" },
                         style = MaterialTheme.typography.headlineLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                 }
                 Spacer(Modifier.width(16.dp))
@@ -211,9 +227,19 @@ private fun ContactProfileScreen(
                     Text(contact.fullName, style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
                     Text(
                         stringResource(R.string.contact_job_at_company, contact.jobTitle, contact.company),
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+            }
+        }
+
+        item {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
                 Box {
                     StatusBadge(contact.status)
                     DropdownMenu(
@@ -228,6 +254,11 @@ private fun ContactProfileScreen(
                         }
                     }
                 }
+                Text(
+                    "${formatDate(contact.dateMet)}${if (contact.locationMet.isNotBlank()) " · ${contact.locationMet}" else ""}",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
 
@@ -239,7 +270,7 @@ private fun ContactProfileScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(180.dp)
-                        .clip(RoundedCornerShape(14.dp)),
+                        .clip(RoundedCornerShape(20.dp)),
                     contentScale = ContentScale.Crop,
                 )
             }
@@ -263,8 +294,12 @@ private fun ContactProfileScreen(
         }
 
         item {
-            OutlinedCard {
-                Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            androidx.compose.material3.Card(
+                Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(20.dp),
+                colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            ) {
+                Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     InfoRow(Icons.Default.Person, stringResource(R.string.contact_info_name), contact.fullName)
                     InfoRow(Icons.Default.Work, stringResource(R.string.contact_info_title), contact.jobTitle)
                     InfoRow(Icons.Default.Business, stringResource(R.string.contact_info_company), contact.company)
@@ -277,11 +312,22 @@ private fun ContactProfileScreen(
 
         if (contact.notes.isNotBlank()) {
             item {
-                OutlinedCard {
-                    Column(Modifier.padding(16.dp)) {
-                        Text(stringResource(R.string.contact_relationship_notes), fontWeight = FontWeight.SemiBold)
-                        Spacer(Modifier.height(6.dp))
-                        Text(contact.notes)
+                androidx.compose.material3.Card(
+                    Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = androidx.compose.material3.CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                ) {
+                    Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Text(
+                            stringResource(R.string.contact_relationship_notes),
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            contact.notes,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
             }
@@ -289,7 +335,7 @@ private fun ContactProfileScreen(
 
         if (contact.tags.isNotEmpty()) {
             item {
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                androidx.compose.foundation.layout.Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     contact.tags.forEach {
                         AssistChip(onClick = {}, label = { Text(it.name) })
                     }

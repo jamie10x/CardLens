@@ -12,9 +12,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Badge
+import androidx.compose.material.icons.filled.CameraAlt
+import androidx.compose.material.icons.filled.Event
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -24,34 +30,44 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import uz.cardlens.R
+import uz.cardlens.ui.theme.GradientAccent
+import uz.cardlens.ui.theme.GradientIndigo
+import uz.cardlens.ui.theme.GradientTeal
 
 private data class OnboardingPage(
     val titleResId: Int,
     val descriptionResId: Int,
-    val emoji: String,
+    val icon: ImageVector,
+    val gradient: List<Color>,
 )
 
 private val pages = listOf(
     OnboardingPage(
         titleResId = R.string.onboarding_title_1,
         descriptionResId = R.string.onboarding_desc_1,
-        emoji = "\uD83D\uDCF7",
+        icon = Icons.Default.CameraAlt,
+        gradient = GradientTeal,
     ),
     OnboardingPage(
         titleResId = R.string.onboarding_title_2,
         descriptionResId = R.string.onboarding_desc_2,
-        emoji = "\uD83D\uDCC4",
+        icon = Icons.Default.Badge,
+        gradient = GradientIndigo,
     ),
     OnboardingPage(
         titleResId = R.string.onboarding_title_3,
         descriptionResId = R.string.onboarding_desc_3,
-        emoji = "\u23F0",
+        icon = Icons.Default.Event,
+        gradient = GradientAccent,
     ),
 )
 
@@ -64,7 +80,9 @@ fun OnboardingRoute(
     val scope = rememberCoroutineScope()
 
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         HorizontalPager(
@@ -79,18 +97,29 @@ fun OnboardingRoute(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(
-                    text = page.emoji,
-                    style = MaterialTheme.typography.displayLarge,
-                )
-                Spacer(Modifier.height(32.dp))
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(RoundedCornerShape(36.dp))
+                        .background(Brush.linearGradient(page.gradient)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = page.icon,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(56.dp),
+                    )
+                }
+                Spacer(Modifier.height(40.dp))
                 Text(
                     text = stringResource(page.titleResId),
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.headlineLarge,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(14.dp))
                 Text(
                     text = stringResource(page.descriptionResId),
                     style = MaterialTheme.typography.bodyLarge,
@@ -101,23 +130,25 @@ fun OnboardingRoute(
         }
 
         Row(
-            modifier = Modifier.padding(bottom = 16.dp),
+            modifier = Modifier.padding(bottom = 20.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             pages.indices.forEach { index ->
+                val selected = pagerState.currentPage == index
                 Box(
                     modifier = Modifier
-                        .size(if (pagerState.currentPage == index) 10.dp else 8.dp)
-                        .clip(CircleShape)
+                        .height(8.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .width(if (selected) 24.dp else 8.dp)
                         .background(
-                            if (pagerState.currentPage == index) MaterialTheme.colorScheme.primary
-                            else MaterialTheme.colorScheme.outlineVariant
+                            if (selected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.outlineVariant,
                         ),
                 )
             }
         }
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(12.dp))
 
         Button(
             onClick = {
@@ -129,9 +160,15 @@ fun OnboardingRoute(
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 40.dp),
+                .padding(horizontal = 40.dp)
+                .height(54.dp),
+            shape = RoundedCornerShape(16.dp),
         ) {
-            Text(if (pagerState.currentPage < pages.size - 1) stringResource(R.string.onboarding_next) else stringResource(R.string.onboarding_get_started))
+            Text(
+                if (pagerState.currentPage < pages.size - 1) stringResource(R.string.onboarding_next) else stringResource(R.string.onboarding_get_started),
+                fontWeight = FontWeight.SemiBold,
+                style = MaterialTheme.typography.titleMedium,
+            )
         }
 
         if (pagerState.currentPage < pages.size - 1) {

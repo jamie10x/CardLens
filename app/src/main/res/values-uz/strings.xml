@@ -61,9 +61,6 @@
     <string name="contact_info_met">Uchrashilgan</string>
     <string name="contact_card_image">Vizitka rasmi</string>
     <string name="contact_unknown">Noma\'lum kontakt</string>
-    <string name="contact_untitled">Nomsiz kontakt</string>
-    <string name="contact_follow_up_title">%s bilan bog\'lanish</string>
-    <string name="contact_new_contact">yangi kontakt</string>
     <string name="contact_job_at_company">%1$s, %2$s</string>
 
     <!-- Scan -->
@@ -76,7 +73,6 @@
     <string name="scan_save_contact">Kontaktni saqlash</string>
     <string name="scan_flash_on">Fleshni o\'chirish</string>
     <string name="scan_flash_off">Fleshni yoqish</string>
-    <string name="scan_capture">Suratga olish</string>
     <string name="scan_error_ocr">Vizitkani avtomatik o\'qib bo\'lmadi.</string>
     <string name="scan_reading">Vizitka o\'qilmoqda…</string>
     <string name="scan_error_save">Kontaktni saqlab bo\'lmadi</string>
@@ -141,7 +137,6 @@
     <!-- General -->
     <string name="loading">Yuklanmoqda…</string>
     <string name="ok">OK</string>
-    <string name="save">Saqlash</string>
     <string name="delete">O\'chirish</string>
     <string name="cancel">Bekor qilish</string>
 
@@ -152,10 +147,4 @@
     <string name="notification_channel_followups">Eslatma bildirishnomalari</string>
     <string name="notification_default_title">Kontaktingiz bilan bog\'laning</string>
     <string name="notification_content_title">CardLens eslatmasi</string>
-
-    <!-- Section headers used as content descriptions -->
-    <string name="section_header_contacts">Kontaktlar</string>
-    <string name="section_header_due_today">Bugun muddati</string>
-    <string name="section_header_action_needed">Harakat talab qilinadi</string>
-    <string name="section_header_recent_scans">Oxirgi skanerlar</string>
 </resources>
