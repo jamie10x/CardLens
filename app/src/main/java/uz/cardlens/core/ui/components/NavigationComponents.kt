@@ -12,10 +12,10 @@ import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Badge
 import androidx.compose.material.icons.outlined.CameraAlt
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,15 +31,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import uz.cardlens.R
+import com.neopulsar.cardlens.R
 import uz.cardlens.core.navigation.Tab
 
-data class BottomNavItem(
-    val tab: Tab,
-    val labelResId: Int,
-    val filledIcon: ImageVector,
-    val outlineIcon: ImageVector,
-)
+data class BottomNavItem(val tab: Tab, val labelResId: Int, val filledIcon: ImageVector, val outlineIcon: ImageVector)
 
 val bottomNavItems = listOf(
     BottomNavItem(Tab.Home, R.string.nav_home, Icons.Filled.Home, Icons.Outlined.Home),
@@ -50,15 +45,11 @@ val bottomNavItems = listOf(
 )
 
 @Composable
-fun CardLensBottomBar(
-    activeTab: Tab,
-    onTabClick: (Tab) -> Unit,
-    notificationsBadge: Boolean = false,
-) {
+fun CardLensBottomBar(activeTab: Tab, onTabClick: (Tab) -> Unit, notificationsBadge: Boolean = false) {
     NavigationBar(
         containerColor = MaterialTheme.colorScheme.surface,
-        tonalElevation = 0.dp,
-        modifier = Modifier.height(72.dp),
+        tonalElevation = 6.dp,
+        modifier = Modifier.fillMaxWidth().height(76.dp),
     ) {
         bottomNavItems.forEach { item ->
             val label = stringResource(item.labelResId)
@@ -67,35 +58,30 @@ fun CardLensBottomBar(
                 selected = selected,
                 onClick = { onTabClick(item.tab) },
                 icon = {
-                    Box(contentAlignment = Alignment.Center) {
+                    Box(contentAlignment = Alignment.Center, modifier = Modifier.size(28.dp)) {
                         Icon(
                             if (selected) item.filledIcon else item.outlineIcon,
                             contentDescription = label,
-                            modifier = Modifier.size(26.dp),
+                            modifier = Modifier.size(24.dp),
                         )
                         if (item.tab == Tab.FollowUps && notificationsBadge) {
                             Box(
-                                Modifier
-                                    .size(8.dp)
-                                    .align(Alignment.TopEnd)
-                                    .background(MaterialTheme.colorScheme.error, CircleShape),
+                                Modifier.size(9.dp).align(Alignment.TopEnd)
+                                    .clip(CircleShape).background(MaterialTheme.colorScheme.error)
+                                    .clip(CircleShape),
                             )
                         }
                     }
                 },
                 label = {
-                    Text(
-                        label,
-                        fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                        style = MaterialTheme.typography.labelMedium,
-                    )
+                    Text(label, fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium, style = MaterialTheme.typography.labelSmall)
                 },
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MaterialTheme.colorScheme.primary,
                     selectedTextColor = MaterialTheme.colorScheme.primary,
-                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                    unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.85f),
                     unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                    indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
+                    indicatorColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.55f),
                 ),
             )
         }

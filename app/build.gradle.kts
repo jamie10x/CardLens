@@ -14,11 +14,11 @@ val keystoreProperties = Properties().apply {
 }
 
 android {
-    namespace = "uz.cardlens"
+    namespace = "com.neopulsar.cardlens"
     compileSdk = 37
 
     defaultConfig {
-        applicationId = "uz.cardlens"
+        applicationId = "com.neopulsar.cardlens"
         minSdk = 26
         targetSdk = 37
         versionCode = 1

@@ -1,6 +1,7 @@
 package uz.cardlens.feature.home.presentation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -10,15 +11,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Contacts
 import androidx.compose.material.icons.filled.Schedule
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,8 +35,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import org.koin.androidx.compose.koinViewModel
-import uz.cardlens.R
+import com.neopulsar.cardlens.R
 import uz.cardlens.core.domain.Contact
 import uz.cardlens.core.ui.components.ContactCard
 import uz.cardlens.core.ui.components.EmptyState
@@ -143,27 +146,51 @@ private fun HeroSection() {
     Box(
         Modifier
             .fillMaxWidth()
-            .height(160.dp)
-            .clip(RoundedCornerShape(24.dp))
-            .background(Brush.linearGradient(GradientHero)),
+            .height(152.dp)
+            .clip(RoundedCornerShape(28.dp))
+            .background(Brush.linearGradient(GradientHero))
+            .border(
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.10f),
+                shape = RoundedCornerShape(28.dp),
+            ),
     ) {
+        // Decorative translucent circles for depth — premium feel
+        Box(
+            Modifier
+                .size(200.dp)
+                .offset(x = 120.dp, y = (-40).dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.07f))
+                .align(Alignment.TopEnd),
+        )
+        Box(
+            Modifier
+                .size(120.dp)
+                .offset(x = (-18).dp, y = 88.dp)
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.05f))
+                .align(Alignment.BottomStart),
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(22.dp),
+                .padding(horizontal = 22.dp, vertical = 20.dp),
             verticalArrangement = Arrangement.Center,
         ) {
             Text(
                 stringResource(R.string.home_greeting),
                 color = Color.White,
                 style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                fontWeight = FontWeight.ExtraBold,
+                letterSpacing = (-0.3).sp,
             )
-            Spacer(Modifier.height(4.dp))
+            Spacer(Modifier.height(6.dp))
             Text(
                 stringResource(R.string.home_network_snapshot),
-                color = Color.White.copy(alpha = 0.85f),
+                color = Color.White.copy(alpha = 0.88f),
                 style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Medium,
             )
         }
     }

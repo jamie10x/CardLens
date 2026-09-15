@@ -40,6 +40,7 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
+import com.neopulsar.cardlens.R
 import uz.cardlens.core.datastore.AppPreferences
 import java.util.Locale
 import uz.cardlens.core.navigation.Tab

@@ -1,7 +1,7 @@
 package uz.cardlens.core.domain
 
 import java.util.UUID
-import uz.cardlens.R
+import com.neopulsar.cardlens.R
 
 enum class ContactStatus(val label: String, val displayResId: Int) {
     New("New", R.string.status_new),

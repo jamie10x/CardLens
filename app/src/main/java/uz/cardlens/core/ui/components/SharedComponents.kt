@@ -28,6 +28,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Phone
@@ -42,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import uz.cardlens.ui.theme.statusColor
 import uz.cardlens.ui.theme.statusSoftColor
 
@@ -82,41 +84,55 @@ fun PremiumMetricCard(
     gradient: List<Color> = listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.primary),
     icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
 ) {
+    // Premium light surface card — gradient param is kept for API compat
+    // but we derive a soft badge color from it (indigo vs teal).
+    val isIndigo = gradient === uz.cardlens.ui.theme.GradientIndigo
+    val badgeBg = if (isIndigo) MaterialTheme.colorScheme.secondaryContainer
+    else MaterialTheme.colorScheme.primaryContainer
+    val badgeTint = if (isIndigo) MaterialTheme.colorScheme.secondary
+    else MaterialTheme.colorScheme.primary
+
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = androidx.compose.foundation.BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.55f),
+        ),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
-        Box(
-            Modifier
-                .fillMaxWidth()
-                .background(
-                    Brush.linearGradient(gradient),
-                    RoundedCornerShape(20.dp),
-                ),
-        ) {
-            Column(Modifier.padding(18.dp)) {
-                if (icon != null) {
+        Column(Modifier.padding(16.dp)) {
+            if (icon != null) {
+                Box(
+                    Modifier
+                        .size(38.dp)
+                        .clip(CircleShape)
+                        .background(badgeBg),
+                    contentAlignment = Alignment.Center,
+                ) {
                     Icon(
                         icon,
                         contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.85f),
-                        modifier = Modifier.size(22.dp),
+                        tint = badgeTint,
+                        modifier = Modifier.size(20.dp),
                     )
-                    Spacer(Modifier.height(10.dp))
                 }
-                Text(
-                    value,
-                    style = MaterialTheme.typography.headlineLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White,
-                )
-                Text(
-                    label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = Color.White.copy(alpha = 0.85f),
-                )
+                Spacer(Modifier.height(12.dp))
             }
+            Text(
+                value,
+                style = MaterialTheme.typography.headlineLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Spacer(Modifier.height(2.dp))
+            Text(
+                label,
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Medium,
+            )
         }
     }
 }
@@ -129,16 +145,17 @@ fun SectionHeader(text: String, modifier: Modifier = Modifier) {
     ) {
         Box(
             Modifier
-                .size(width = 4.dp, height = 18.dp)
-                .clip(RoundedCornerShape(2.dp))
-                .background(MaterialTheme.colorScheme.primary),
+                .size(width = 3.dp, height = 16.dp)
+                .clip(RoundedCornerShape(999.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)),
         )
-        Spacer(Modifier.width(8.dp))
+        Spacer(Modifier.width(10.dp))
         Text(
             text,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onSurface,
+            letterSpacing = (-0.1).sp,
         )
     }
 }
@@ -155,33 +172,41 @@ fun EmptyState(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 32.dp),
+            .padding(vertical = 36.dp, horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
         Box(
             Modifier
-                .size(72.dp)
+                .size(80.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f))
+                .background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f)),
+            contentAlignment = Alignment.Center,
         ) {
+            // subtle inner border
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .clip(CircleShape)
+                    .background(Color.Transparent),
+            )
             if (icon != null) {
                 Icon(
                     icon,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .size(32.dp)
-                        .align(Alignment.Center),
+                    modifier = Modifier.size(28.dp),
                 )
             }
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(18.dp))
         Text(
             title,
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.fillMaxWidth(0.85f),
         )
         if (description != null) {
             Spacer(Modifier.height(6.dp))
@@ -190,12 +215,26 @@ fun EmptyState(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(0.9f),
             )
         }
         if (actionLabel != null && onAction != null) {
-            Spacer(Modifier.height(16.dp))
-            androidx.compose.material3.Button(onClick = onAction) {
-                Text(actionLabel)
+            Spacer(Modifier.height(20.dp))
+            androidx.compose.material3.Button(
+                onClick = onAction,
+                shape = RoundedCornerShape(999.dp),
+                contentPadding = androidx.compose.foundation.layout.PaddingValues(
+                    horizontal = 22.dp,
+                    vertical = 12.dp,
+                ),
+            ) {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+                Spacer(Modifier.width(8.dp))
+                Text(actionLabel, fontWeight = FontWeight.SemiBold)
             }
         }
     }
@@ -303,19 +342,19 @@ fun QuickActions(
     ) {
         QuickActionButton(
             icon = Icons.Outlined.Phone,
-            label = stringResource(uz.cardlens.R.string.action_call),
+            label = stringResource(com.neopulsar.cardlens.R.string.action_call),
             onClick = onCall,
             modifier = Modifier.weight(1f),
         )
         QuickActionButton(
             icon = Icons.Outlined.Email,
-            label = stringResource(uz.cardlens.R.string.action_email),
+            label = stringResource(com.neopulsar.cardlens.R.string.action_email),
             onClick = onEmail,
             modifier = Modifier.weight(1f),
         )
         QuickActionButton(
             icon = Icons.Outlined.ContentCopy,
-            label = stringResource(uz.cardlens.R.string.action_copy),
+            label = stringResource(com.neopulsar.cardlens.R.string.action_copy),
             onClick = onCopy,
             modifier = Modifier.weight(1f),
         )
@@ -332,27 +371,23 @@ private fun QuickActionButton(
     Card(
         onClick = onClick,
         modifier = modifier,
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f),
-        ),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp),
     ) {
         Column(
-            modifier = Modifier.padding(vertical = 14.dp),
+            modifier = Modifier.padding(vertical = 12.dp).fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Icon(
-                icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp),
-            )
-            Spacer(Modifier.height(6.dp))
-            Text(
-                label,
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
+            Box(
+                Modifier.size(32.dp).clip(CircleShape).background(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(icon, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(18.dp))
+            }
+            Spacer(Modifier.height(8.dp))
+            Text(label, style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }

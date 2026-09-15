@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import uz.cardlens.R
+import com.neopulsar.cardlens.R
 import uz.cardlens.core.data.CardLensRepository
 import uz.cardlens.core.domain.Contact
 import uz.cardlens.core.domain.ContactStatus

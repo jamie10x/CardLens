@@ -1,34 +1,29 @@
-# CardLens ProGuard Rules
+# CardLens ProGuard Rules — Release
+-keepattributes *Annotation*, InnerClasses, EnclosingMethod, Signature
 
-# Keep Kotlin serialization
--keepattributes *Annotation*, InnerClasses
--dontnote kotlinx.serialization.AnnotationsKt
--keepclassmembers class kotlinx.serialization.json.** { *** Companion; }
--keepclasseswithmembers class kotlinx.serialization.json.** { kotlinx.serialization.KSerializer serializer(...); }
--keep,includedescriptorclasses class uz.cardlens.**$$serializer { *; }
--keepclassmembers class uz.cardlens.** { *** Companion; }
--keepclasseswithmembers class uz.cardlens.** { kotlinx.serialization.KSerializer serializer(...); }
-
-# Keep Room entities
+# Keep Room
 -keep class * extends androidx.room.RoomDatabase { *; }
 -keep @androidx.room.Entity class * { *; }
 -keep @androidx.room.Dao interface * { *; }
 
-# Keep Koin
+# Keep Koin (reflection)
 -keep class org.koin.** { *; }
+-dontwarn org.koin.**
 
-# Keep Ktor
--keep class io.ktor.** { *; }
--dontwarn io.ktor.**
-
-# Keep Supabase
--keep class io.github.jan.supabase.** { *; }
-
-# Keep Coil
+# Keep Coil3
 -keep class coil3.** { *; }
+-dontwarn coil3.**
 
-# Keep CameraX
+# Keep CameraX / MLKit
 -keep class androidx.camera.** { *; }
-
-# Keep ML Kit
+-dontwarn androidx.camera.**
 -keep class com.google.mlkit.** { *; }
+-dontwarn com.google.mlkit.**
+
+# Keep domain / data models (Room entities, UI)
+-keep class uz.cardlens.core.data.** { *; }
+-keep class uz.cardlens.core.domain.** { *; }
+
+# General Android
+-dontwarn android.**
+-keep class android.support.** { *; }

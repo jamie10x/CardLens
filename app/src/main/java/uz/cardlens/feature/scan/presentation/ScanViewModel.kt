@@ -21,7 +21,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.util.UUID
 
-import uz.cardlens.R
+import com.neopulsar.cardlens.R
 
 enum class ReminderPreset(val labelResId: Int) {
     LaterToday(R.string.reminder_later_today),

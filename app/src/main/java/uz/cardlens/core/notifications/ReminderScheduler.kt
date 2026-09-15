@@ -18,7 +18,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
 import uz.cardlens.MainActivity
-import uz.cardlens.R
+import com.neopulsar.cardlens.R
 import uz.cardlens.core.domain.FollowUp
 import java.util.concurrent.TimeUnit
 
