@@ -43,6 +43,8 @@ android {
         release {
             isMinifyEnabled = true
             isShrinkResources = true
+            isDebuggable = false
+            isJniDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
@@ -64,6 +66,16 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        jniLibs {
+            // Keep only supported ABIs; Play splits by ABI for AAB anyway
+            // If you ship APKs manually, consider abi splits / universalApk false
+            useLegacyPackaging = false
+        }
+    }
+
+    androidResources {
+        // Strip unused locales — app ships en (default) + uz only
+        localeFilters += listOf("en", "uz")
     }
 }
 
