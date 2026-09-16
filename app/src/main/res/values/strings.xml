@@ -98,7 +98,7 @@
     <string name="settings_storage">Storage</string>
     <string name="settings_storage_desc">Your contacts and card images are stored only on this device</string>
     <string name="settings_app_version">App version</string>
-    <string name="settings_app_version_value">1.0.0</string>
+    <string name="settings_app_version_value">1.1.0</string>
     <string name="settings_language">Language</string>
     <string name="settings_offline_note">CardLens works fully offline. Your data never leaves your device.</string>
     <string name="language_english">English</string>
