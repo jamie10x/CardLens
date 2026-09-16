@@ -99,7 +99,7 @@ class ContactProfileViewModel(
     }
 
     private fun startEdit() {
-        val c = mutableState.value.contact ?: return
+        val c = state.value.contact ?: return
         mutableState.update {
             it.copy(
                 isEditing = true,
@@ -116,7 +116,7 @@ class ContactProfileViewModel(
     }
 
     private fun saveEdit() {
-        val c = mutableState.value.contact ?: return
+        val c = state.value.contact ?: return
         val s = mutableState.value
         viewModelScope.launch {
             val updated = c.copy(
@@ -130,7 +130,9 @@ class ContactProfileViewModel(
                 dateMet = s.editDateMet,
                 updatedAt = System.currentTimeMillis(),
             )
-            repository.saveContact(updated, null)
+            try {
+                repository.saveContact(updated, null)
+            } catch (_: Exception) {}
             mutableState.update { it.copy(isEditing = false) }
             _effects.send(ContactProfileEffect.ShowSnackbar(R.string.contact_updated))
         }
@@ -138,15 +140,20 @@ class ContactProfileViewModel(
 
     private fun confirmDelete() {
         viewModelScope.launch {
-            repository.deleteContact(contactId)
+            try {
+                repository.deleteContact(contactId)
+            } catch (_: Exception) {}
+            mutableState.update { it.copy(showDeleteConfirmation = false) }
             _effects.send(ContactProfileEffect.ShowSnackbar(R.string.contact_deleted))
         }
     }
 
     private fun changeStatus(status: ContactStatus) {
-        val c = mutableState.value.contact ?: return
+        val c = state.value.contact ?: return
         viewModelScope.launch {
-            repository.saveContact(c.copy(status = status, updatedAt = System.currentTimeMillis()), null)
+            try {
+                repository.saveContact(c.copy(status = status, updatedAt = System.currentTimeMillis()), null)
+            } catch (_: Exception) {}
             mutableState.update { it.copy(showStatusMenu = false) }
             _effects.send(ContactProfileEffect.ShowSnackbar(R.string.contact_status_changed, status.label))
         }

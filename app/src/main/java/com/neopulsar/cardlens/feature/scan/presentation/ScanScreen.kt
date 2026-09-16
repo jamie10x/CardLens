@@ -1,10 +1,13 @@
 package com.neopulsar.cardlens.feature.scan.presentation
 
 import com.neopulsar.cardlens.R
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.view.MotionEvent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.FocusMeteringAction
@@ -70,7 +73,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import java.io.File
 import android.widget.Toast
@@ -213,29 +215,84 @@ private fun CameraPreview(
     var camera by remember { mutableStateOf<Camera?>(null) }
     var imageCapture by remember { mutableStateOf<ImageCapture?>(null) }
     var isFlashOn by remember { mutableStateOf(false) }
+    var hasCameraPermission by remember {
+        mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+    }
+    var permissionDenied by remember { mutableStateOf(false) }
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        hasCameraPermission = granted
+        permissionDenied = !granted
+    }
+
+    LaunchedEffect(Unit) {
+        if (!hasCameraPermission) cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+    }
+
+    if (!hasCameraPermission) {
+        Box(modifier = modifier.background(Color.Black), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.padding(24.dp)) {
+                Text(
+                    if (permissionDenied) "Camera permission denied. Enable in settings to scan." else "Camera permission needed to scan cards",
+                    color = Color.White, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center,
+                )
+                if (permissionDenied) {
+                    OutlinedButton(onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }, shape = RoundedCornerShape(12.dp)) {
+                        Text("Grant permission", color = Color.White)
+                    }
+                } else {
+                    Button(onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }, shape = RoundedCornerShape(12.dp)) {
+                        Text("Allow camera")
+                    }
+                }
+                OutlinedButton(onClick = { /* gallery handled in parent */ }, shape = RoundedCornerShape(12.dp)) {
+                    Text("Upload from gallery", color = Color.White)
+                }
+            }
+        }
+        return
+    }
 
     DisposableEffect(lifecycleOwner) {
         val providerFuture = ProcessCameraProvider.getInstance(context)
         providerFuture.addListener(
             {
-                val cameraProvider = providerFuture.get()
-                val preview = Preview.Builder().build().also {
-                    it.surfaceProvider = previewView.surfaceProvider
+                try {
+                    val cameraProvider = providerFuture.get()
+                    val preview = Preview.Builder().build().also {
+                        it.surfaceProvider = previewView.surfaceProvider
+                    }
+                    val capture = ImageCapture.Builder()
+                        .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
+                        .build()
+                    imageCapture = capture
+                    cameraProvider.unbindAll()
+                    try {
+                        camera = cameraProvider.bindToLifecycle(
+                            lifecycleOwner,
+                            CameraSelector.DEFAULT_BACK_CAMERA,
+                            preview,
+                            capture,
+                        )
+                    } catch (e: SecurityException) {
+                        // Permission revoked between check and bind
+                    } catch (e: Exception) {
+                        // Camera unavailable (no hardware, other app using)
+                    }
+                } catch (e: Exception) {
+                    // providerFuture.get() throws ExecutionException / InterruptedException
                 }
-                imageCapture = ImageCapture.Builder()
-                    .setCaptureMode(ImageCapture.CAPTURE_MODE_MINIMIZE_LATENCY)
-                    .build()
-                cameraProvider.unbindAll()
-                camera = cameraProvider.bindToLifecycle(
-                    lifecycleOwner,
-                    CameraSelector.DEFAULT_BACK_CAMERA,
-                    preview,
-                    imageCapture,
-                )
             },
             executor,
         )
-        onDispose { providerFuture.get().unbindAll() }
+        onDispose {
+            try {
+                if (providerFuture.isDone) {
+                    try {
+                        providerFuture.get().unbindAll()
+                    } catch (_: Exception) {}
+                }
+            } catch (_: Exception) {}
+        }
     }
 
     previewView.setOnTouchListener { _, event ->
@@ -320,15 +377,26 @@ private fun CameraPreview(
         ) {
             IconButton(
                 onClick = {
-                    val file = File(context.cacheDir, "card_${System.currentTimeMillis()}.jpg")
-                    val outputOptions = ImageCapture.OutputFileOptions.Builder(file).build()
-                    imageCapture?.takePicture(
-                        outputOptions, executor,
-                        object : ImageCapture.OnImageSavedCallback {
-                            override fun onImageSaved(o: ImageCapture.OutputFileResults) { onImageCaptured(Uri.fromFile(file)) }
-                            override fun onError(e: ImageCaptureException) {}
-                        },
-                    )
+                    val capture = imageCapture
+                    if (capture == null) {
+                        Toast.makeText(context, "Camera not ready, try again", Toast.LENGTH_SHORT).show()
+                        return@IconButton
+                    }
+                    try {
+                        val file = File(context.cacheDir, "card_${System.currentTimeMillis()}.jpg")
+                        val outputOptions = ImageCapture.OutputFileOptions.Builder(file).build()
+                        capture.takePicture(
+                            outputOptions, executor,
+                            object : ImageCapture.OnImageSavedCallback {
+                                override fun onImageSaved(o: ImageCapture.OutputFileResults) { onImageCaptured(Uri.fromFile(file)) }
+                                override fun onError(e: ImageCaptureException) {
+                                    Toast.makeText(context, "Capture failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                                }
+                            },
+                        )
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Camera error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    }
                 },
                 modifier = Modifier
                     .size(64.dp)

@@ -2,6 +2,9 @@ package com.neopulsar.cardlens.feature.settings.presentation
 
 import com.neopulsar.cardlens.R
 import android.content.Intent
+import android.widget.Toast
+import androidx.core.content.FileProvider
+import java.io.File
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -67,12 +70,57 @@ fun SettingsRoute(
         viewModel.effects.collect { effect ->
             when (effect) {
                 is SettingsEffect.ExportCsv -> {
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        type = "text/csv"
-                        putExtra(Intent.EXTRA_TEXT, effect.csvContent)
-                        putExtra(Intent.EXTRA_SUBJECT, exportSubject)
+                    try {
+                        if (effect.csvContent.isBlank()) {
+                            Toast.makeText(context, "No contacts to export", Toast.LENGTH_SHORT).show()
+                            return@collect
+                        }
+                        // Write to cache file and share via FileProvider — avoids TransactionTooLarge
+                        val cacheFile = File(context.cacheDir, "cardlens_export.csv")
+                        try {
+                            cacheFile.writeText(effect.csvContent)
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Export failed: ${e.message}", Toast.LENGTH_SHORT).show()
+                            return@collect
+                        }
+                        val uri = try {
+                            FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", cacheFile)
+                        } catch (e: Exception) {
+                            // Fallback to EXTRA_TEXT for small content
+                            val fallback = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/csv"
+                                putExtra(Intent.EXTRA_TEXT, effect.csvContent.take(400000))
+                                putExtra(Intent.EXTRA_SUBJECT, exportSubject)
+                            }
+                            val chooser = Intent.createChooser(fallback, exportTitle)
+                            if (fallback.resolveActivity(context.packageManager) != null) {
+                                context.startActivity(chooser)
+                            } else {
+                                Toast.makeText(context, "No app to share", Toast.LENGTH_SHORT).show()
+                            }
+                            return@collect
+                        }
+                        val intent = Intent(Intent.ACTION_SEND).apply {
+                            type = "text/csv"
+                            putExtra(Intent.EXTRA_STREAM, uri)
+                            putExtra(Intent.EXTRA_SUBJECT, exportSubject)
+                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            // ClipData for Android 13+ permission grant
+                            clipData = android.content.ClipData.newUri(context.contentResolver, "CSV", uri)
+                        }
+                        val chooser = Intent.createChooser(intent, exportTitle)
+                        try {
+                            if (intent.resolveActivity(context.packageManager) != null) {
+                                context.startActivity(chooser)
+                            } else {
+                                Toast.makeText(context, "No app to share", Toast.LENGTH_SHORT).show()
+                            }
+                        } catch (e: Exception) {
+                            Toast.makeText(context, "Cannot share: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Export failed", Toast.LENGTH_SHORT).show()
                     }
-                    context.startActivity(Intent.createChooser(intent, exportTitle))
                 }
             }
         }
@@ -81,7 +129,11 @@ fun SettingsRoute(
     SettingsScreen(
         state = state,
         onExport = { viewModel.onAction(SettingsAction.ExportContacts) },
-        onToggleLanguage = { viewModel.onAction(SettingsAction.ToggleLanguage) },
+        onToggleLanguage = {
+            viewModel.onAction(SettingsAction.ToggleLanguage)
+            // Trigger Activity recreate to apply new locale (handled in attachBaseContext with safe timeout)
+            try { onToggleLanguage() } catch (_: Exception) {}
+        },
     )
 }
 

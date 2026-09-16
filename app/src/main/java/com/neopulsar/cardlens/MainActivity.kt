@@ -41,8 +41,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.compose.koinInject
 import com.neopulsar.cardlens.core.datastore.AppPreferences
-import java.util.Locale
 import com.neopulsar.cardlens.core.navigation.Tab
+import java.util.Locale
 import com.neopulsar.cardlens.core.ui.components.CardLensBottomBar
 import com.neopulsar.cardlens.feature.contacts.presentation.ContactProfileRoute
 import com.neopulsar.cardlens.feature.contacts.presentation.ContactsRoute
@@ -55,13 +55,17 @@ import com.neopulsar.cardlens.ui.theme.CardLensTheme
 
 class MainActivity : ComponentActivity() {
     override fun attachBaseContext(newBase: Context?) {
-        val prefs = newBase?.let { AppPreferences(it) }
-        val langCode = prefs?.languageSync() ?: "en"
-        val locale = Locale.forLanguageTag(langCode)
-        Locale.setDefault(locale)
-        val config = Configuration(newBase?.resources?.configuration)
-        config.setLocale(locale)
-        super.attachBaseContext(newBase?.createConfigurationContext(config))
+        try {
+            val prefs = newBase?.let { AppPreferences(it) }
+            val langCode = prefs?.languageSync() ?: "en"
+            val locale = Locale.forLanguageTag(langCode)
+            Locale.setDefault(locale)
+            val config = Configuration(newBase?.resources?.configuration)
+            config.setLocale(locale)
+            super.attachBaseContext(newBase?.createConfigurationContext(config))
+            return
+        } catch (_: Exception) {}
+        super.attachBaseContext(newBase)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -96,7 +100,7 @@ private fun CardLensApp() {
     var startRoute by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(Unit) {
-        val completed = appPrefs.isOnboardingCompleted.first()
+        val completed = try { appPrefs.isOnboardingCompleted.first() } catch (_: Exception) { false }
         startRoute = if (completed) AppRoute.Main.route else AppRoute.Onboarding.route
     }
 

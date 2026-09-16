@@ -30,22 +30,23 @@ class ReminderScheduler(
     private val context: Context
 ) {
     fun schedule(followUp: FollowUp) {
-        val delay = (followUp.dueAt - System.currentTimeMillis()).coerceAtLeast(0)
-        val request = OneTimeWorkRequestBuilder<FollowUpReminderWorker>()
-            .setInitialDelay(delay, TimeUnit.MILLISECONDS)
-            .setInputData(
-                workDataOf(
-                    KEY_TITLE to followUp.title,
-                    KEY_CONTACT_ID to followUp.contactId
+        try {
+            val delay = (followUp.dueAt - System.currentTimeMillis()).coerceAtLeast(0)
+            val request = OneTimeWorkRequestBuilder<FollowUpReminderWorker>()
+                .setInitialDelay(delay, TimeUnit.MILLISECONDS)
+                .setInputData(
+                    workDataOf(
+                        KEY_TITLE to followUp.title,
+                        KEY_CONTACT_ID to followUp.contactId
+                    )
                 )
+                .build()
+            WorkManager.getInstance(context).enqueueUniqueWork(
+                "follow-up-${followUp.id}",
+                ExistingWorkPolicy.REPLACE,
+                request
             )
-            .build()
-
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            "follow-up-${followUp.id}",
-            ExistingWorkPolicy.REPLACE,
-            request
-        )
+        } catch (_: Exception) {}
     }
 }
 

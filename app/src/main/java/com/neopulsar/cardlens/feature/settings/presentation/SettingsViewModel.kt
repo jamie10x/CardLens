@@ -39,9 +39,10 @@ class SettingsViewModel(
 
     init {
         viewModelScope.launch {
-            _state.update {
-                it.copy(isUzbek = appPreferences.language.first() == "uz")
-            }
+            try {
+                val lang = try { appPreferences.language.first() } catch (_: Exception) { "en" }
+                _state.update { it.copy(isUzbek = lang == "uz") }
+            } catch (_: Exception) {}
         }
     }
 
@@ -54,28 +55,37 @@ class SettingsViewModel(
 
     private fun exportContacts() {
         viewModelScope.launch {
-            val contacts = repository.observeContacts().first()
-            val csv = buildString {
-                appendLine("Name,Company,Job Title,Email,Phone,Status,Date Met,Location Met,Notes")
-                contacts.forEach { c ->
-                    appendLine(
-                        listOf(
-                            c.fullName, c.company, c.jobTitle, c.email,
-                            c.phone, c.status.label, c.dateMet.toString(),
-                            c.locationMet, c.notes,
-                        ).joinToString(",") { "\"${it.replace("\"", "\"\"")}\"" }
-                    )
+            try {
+                val contacts = try { repository.observeContacts().first() } catch (_: Exception) { emptyList() }
+                val csv = buildString {
+                    appendLine("Name,Company,Job Title,Email,Phone,Status,Date Met,Location Met,Notes")
+                    contacts.forEach { c ->
+                        try {
+                            appendLine(
+                                listOf(
+                                    c.fullName, c.company, c.jobTitle, c.email,
+                                    c.phone, c.status.label, c.dateMet.toString(),
+                                    c.locationMet, c.notes,
+                                ).joinToString(",") { "\"${it.replace("\"", "\"\"")}\"" }
+                            )
+                        } catch (_: Exception) {}
+                    }
                 }
+                _effects.emit(SettingsEffect.ExportCsv(csv))
+            } catch (_: Exception) {
+                try { _effects.emit(SettingsEffect.ExportCsv("Name,Company\n")) } catch (_: Exception) {}
             }
-            _effects.emit(SettingsEffect.ExportCsv(csv))
         }
     }
 
     private fun toggleLanguage() {
         viewModelScope.launch {
-            val newLang = if (appPreferences.language.first() == "en") "uz" else "en"
-            appPreferences.setLanguage(newLang)
-            _state.update { it.copy(isUzbek = newLang == "uz") }
+            try {
+                val current = try { appPreferences.language.first() } catch (_: Exception) { "en" }
+                val newLang = if (current == "en") "uz" else "en"
+                try { appPreferences.setLanguage(newLang) } catch (_: Exception) {}
+                _state.update { it.copy(isUzbek = newLang == "uz") }
+            } catch (_: Exception) {}
         }
     }
 }

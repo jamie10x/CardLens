@@ -214,7 +214,51 @@ private fun ContactProfileScreen(
             }
         }
 
-        item { QuickActions(onCall = { context.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse("tel:${contact.phone}"))) }, onEmail = { context.startActivity(Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:${contact.email}"))) }, onCopy = { val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager; clip.setPrimaryClip(ClipData.newPlainText("Contact", contact.fullName)) }) }
+        item {
+            QuickActions(
+                onCall = {
+                    if (contact.phone.isBlank()) {
+                        Toast.makeText(context, "No phone number", Toast.LENGTH_SHORT).show()
+                        return@QuickActions
+                    }
+                    try {
+                        val intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:${contact.phone}"))
+                        if (intent.resolveActivity(context.packageManager) != null) {
+                            context.startActivity(intent)
+                        } else {
+                            Toast.makeText(context, "No dialer app found", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Cannot open dialer", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                onEmail = {
+                    if (contact.email.isBlank()) {
+                        Toast.makeText(context, "No email address", Toast.LENGTH_SHORT).show()
+                        return@QuickActions
+                    }
+                    try {
+                        val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:${contact.email}"))
+                        if (intent.resolveActivity(context.packageManager) != null) {
+                            context.startActivity(intent)
+                        } else {
+                            Toast.makeText(context, "No email app found", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Cannot open email app", Toast.LENGTH_SHORT).show()
+                    }
+                },
+                onCopy = {
+                    try {
+                        val clip = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        clip.setPrimaryClip(ClipData.newPlainText("Contact", contact.fullName))
+                        Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show()
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Copy failed", Toast.LENGTH_SHORT).show()
+                    }
+                },
+            )
+        }
 
         item {
             Card(Modifier.fillMaxWidth(), shape = RoundedCornerShape(20.dp), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface), border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.45f))) {

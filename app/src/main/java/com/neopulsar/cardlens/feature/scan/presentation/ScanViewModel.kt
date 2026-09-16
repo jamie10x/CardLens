@@ -135,8 +135,8 @@ class ScanViewModel(
             }
             when (repository.saveContact(contact, followUp)) {
                 is AppResult.Success -> {
-                    followUp?.let { reminderScheduler.schedule(it) }
-                    _effect.emit(ScanEffect.ContactSaved(contact.id))
+                    try { followUp?.let { reminderScheduler.schedule(it) } } catch (_: Exception) {}
+                    try { _effect.emit(ScanEffect.ContactSaved(contact.id)) } catch (_: Exception) {}
                 }
                 is AppResult.Error -> _state.update { it.copy(snackbarResId = R.string.scan_error_save) }
             }

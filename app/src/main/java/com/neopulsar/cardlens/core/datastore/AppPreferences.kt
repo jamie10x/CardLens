@@ -3,12 +3,15 @@ package com.neopulsar.cardlens.core.datastore
 import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 
 private val Context.cardLensDataStore by preferencesDataStore(name = "cardlens_prefs")
 
@@ -21,6 +24,7 @@ class AppPreferences(private val context: Context) {
         .map { it[onboardingCompletedKey] ?: false }
 
     val language: Flow<String> = context.cardLensDataStore.data
+        .catch { emit(emptyPreferences()) }
         .map { it[languageKey] ?: "en" }
 
     suspend fun setOnboardingCompleted(completed: Boolean) {
@@ -31,5 +35,7 @@ class AppPreferences(private val context: Context) {
         context.cardLensDataStore.edit { it[languageKey] = language }
     }
 
-    fun languageSync(): String = runBlocking { language.first() }
+    fun languageSync(): String = try {
+        runBlocking { withTimeoutOrNull(300) { language.first() } } ?: "en"
+    } catch (_: Exception) { "en" }
 }
